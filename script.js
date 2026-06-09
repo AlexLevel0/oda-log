@@ -31,11 +31,15 @@ const afternoonMood = document.getElementById("afternoonMood");
 const afternoonDone = document.getElementById("afternoonDone");
 const afternoonImpression = document.getElementById("afternoonImpression");
 
-const saveButton = document.getElementById("saveButton");
+const saveMorningButton = document.getElementById("saveMorningButton");
+const saveAfternoonButton = document.getElementById("saveAfternoonButton");
 const deleteButton = document.getElementById("deleteButton");
 
-const staffButtons = document.getElementById("staffButtons");
-const stampList = document.getElementById("stampList");
+const morningStaffButtons = document.getElementById("morningStaffButtons");
+const afternoonStaffButtons = document.getElementById("afternoonStaffButtons");
+
+const morningStampDisplay = document.getElementById("morningStampDisplay");
+const afternoonStampDisplay = document.getElementById("afternoonStampDisplay");
 
 const calendar = document.getElementById("calendar");
 const monthLabel = document.getElementById("monthLabel");
@@ -47,8 +51,7 @@ const staffSettingsList = document.getElementById("staffSettingsList");
 let currentCalendarDate = new Date();
 
 function getTodayString() {
-  const today = new Date();
-  return formatDate(today);
+  return formatDate(new Date());
 }
 
 function formatDate(date) {
@@ -115,14 +118,15 @@ function createEmptyRecord() {
     morning: {
       mood: "",
       todo: "",
-      note: ""
+      note: "",
+      stamp: null
     },
     afternoon: {
       mood: "",
       done: "",
-      impression: ""
-    },
-    stamp: null
+      impression: "",
+      stamp: null
+    }
   };
 }
 
@@ -133,14 +137,15 @@ function normalizeRecord(record) {
     morning: {
       mood: record?.morning?.mood || emptyRecord.morning.mood,
       todo: record?.morning?.todo || emptyRecord.morning.todo,
-      note: record?.morning?.note || emptyRecord.morning.note
+      note: record?.morning?.note || emptyRecord.morning.note,
+      stamp: record?.morning?.stamp || null
     },
     afternoon: {
       mood: record?.afternoon?.mood || emptyRecord.afternoon.mood,
       done: record?.afternoon?.done || emptyRecord.afternoon.done,
-      impression: record?.afternoon?.impression || emptyRecord.afternoon.impression
-    },
-    stamp: record?.stamp || null
+      impression: record?.afternoon?.impression || emptyRecord.afternoon.impression,
+      stamp: record?.afternoon?.stamp || null
+    }
   };
 }
 
@@ -162,46 +167,60 @@ function loadFormByDate() {
   afternoonDone.value = record.afternoon.done;
   afternoonImpression.value = record.afternoon.impression;
 
-  renderStaffButtons();
-  renderStamp();
+  renderAllStaffButtons();
+  renderAllStamps();
 }
 
-function buildCurrentRecord(oldRecord) {
-  return {
-    morning: {
-      mood: morningMood.value,
-      todo: morningTodo.value.trim(),
-      note: morningNote.value.trim()
-    },
-    afternoon: {
-      mood: afternoonMood.value,
-      done: afternoonDone.value.trim(),
-      impression: afternoonImpression.value.trim()
-    },
-    stamp: oldRecord?.stamp || null
-  };
-}
-
-function saveCurrentRecord() {
+function saveMorningRecord() {
   const records = loadRecords();
   const selectedDate = dateInput.value;
-  const oldRecord = normalizeRecord(records[selectedDate]);
+  const record = normalizeRecord(records[selectedDate]);
 
-  records[selectedDate] = buildCurrentRecord(oldRecord);
+  record.morning.mood = morningMood.value;
+  record.morning.todo = morningTodo.value.trim();
+  record.morning.note = morningNote.value.trim();
 
+  records[selectedDate] = record;
   saveRecords(records);
-  renderCalendar();
 
-  alert("保存したぞ。えらい。");
+  renderCalendar();
+  alert("午前の記録を保存したぞ。");
 }
 
-function saveCurrentRecordSilently() {
+function saveAfternoonRecord() {
   const records = loadRecords();
   const selectedDate = dateInput.value;
-  const oldRecord = normalizeRecord(records[selectedDate]);
+  const record = normalizeRecord(records[selectedDate]);
 
-  records[selectedDate] = buildCurrentRecord(oldRecord);
+  record.afternoon.mood = afternoonMood.value;
+  record.afternoon.done = afternoonDone.value.trim();
+  record.afternoon.impression = afternoonImpression.value.trim();
 
+  records[selectedDate] = record;
+  saveRecords(records);
+
+  renderCalendar();
+  alert("午後の記録を保存したぞ。");
+}
+
+function saveCurrentPeriodSilently(period) {
+  const records = loadRecords();
+  const selectedDate = dateInput.value;
+  const record = normalizeRecord(records[selectedDate]);
+
+  if (period === "morning") {
+    record.morning.mood = morningMood.value;
+    record.morning.todo = morningTodo.value.trim();
+    record.morning.note = morningNote.value.trim();
+  }
+
+  if (period === "afternoon") {
+    record.afternoon.mood = afternoonMood.value;
+    record.afternoon.done = afternoonDone.value.trim();
+    record.afternoon.impression = afternoonImpression.value.trim();
+  }
+
+  records[selectedDate] = record;
   saveRecords(records);
 }
 
@@ -214,7 +233,7 @@ function deleteCurrentRecord() {
     return;
   }
 
-  const confirmed = confirm("この日の記録を削除する？");
+  const confirmed = confirm("この日の午前・午後の記録を全部削除する？");
 
   if (!confirmed) {
     return;
@@ -227,17 +246,19 @@ function deleteCurrentRecord() {
   renderCalendar();
 }
 
-function setStamp(staffName) {
-  saveCurrentRecordSilently();
+function setStamp(period, staffName) {
+  saveCurrentPeriodSilently(period);
 
   const records = loadRecords();
   const selectedDate = dateInput.value;
   const record = normalizeRecord(records[selectedDate]);
 
-  if (record.stamp && record.stamp.staffName === staffName) {
-    record.stamp = null;
+  const currentStamp = record[period].stamp;
+
+  if (currentStamp && currentStamp.staffName === staffName) {
+    record[period].stamp = null;
   } else {
-    record.stamp = {
+    record[period].stamp = {
       staffName: staffName,
       stampedAt: new Date().toISOString()
     };
@@ -246,66 +267,88 @@ function setStamp(staffName) {
   records[selectedDate] = record;
   saveRecords(records);
 
-  renderStaffButtons();
-  renderStamp();
+  renderStaffButtons(period);
+  renderStamp(period);
   renderCalendar();
 }
 
-function renderStaffButtons() {
+function renderAllStaffButtons() {
+  renderStaffButtons("morning");
+  renderStaffButtons("afternoon");
+}
+
+function renderStaffButtons(period) {
   const staff = loadStaff();
   const visibleStaff = staff.filter((member) => member.visible);
   const record = getSelectedDateRecord();
 
-  staffButtons.innerHTML = "";
+  const targetElement = period === "morning"
+    ? morningStaffButtons
+    : afternoonStaffButtons;
+
+  targetElement.innerHTML = "";
 
   if (visibleStaff.length === 0) {
-    staffButtons.innerHTML = `<p class="hint">表示中の職員がいないよ。職員設定でONにしてね。</p>`;
+    targetElement.innerHTML = `<p class="hint">表示中の職員がいないよ。職員設定でONにしてね。</p>`;
     return;
   }
 
   visibleStaff.forEach((member) => {
     const button = document.createElement("button");
-    const isStamped = record.stamp && record.stamp.staffName === member.name;
+    const isStamped = record[period].stamp && record[period].stamp.staffName === member.name;
 
     button.className = isStamped ? "staff-button active" : "staff-button";
     button.textContent = isStamped ? `${member.name} の確認印` : `${member.name} のハンコ`;
 
     button.addEventListener("click", () => {
-      setStamp(member.name);
+      setStamp(period, member.name);
     });
 
-    staffButtons.appendChild(button);
+    targetElement.appendChild(button);
   });
 }
 
-function renderStamp() {
+function renderAllStamps() {
+  renderStamp("morning");
+  renderStamp("afternoon");
+}
+
+function renderStamp(period) {
   const record = getSelectedDateRecord();
 
-  stampList.innerHTML = "";
+  const targetElement = period === "morning"
+    ? morningStampDisplay
+    : afternoonStampDisplay;
 
-  if (!record.stamp) {
-    stampList.innerHTML = `<p class="hint">まだ確認スタンプは押されてない。</p>`;
+  const periodLabel = period === "morning" ? "午前" : "午後";
+  const stamp = record[period].stamp;
+
+  targetElement.innerHTML = "";
+
+  if (!stamp) {
+    targetElement.innerHTML = `<p class="hint">${periodLabel}の確認スタンプはまだ押されてない。</p>`;
     return;
   }
 
-  const stampedDate = new Date(record.stamp.stampedAt);
+  const stampedDate = new Date(stamp.stampedAt);
   const timeText = Number.isNaN(stampedDate.getTime())
     ? ""
     : `${String(stampedDate.getHours()).padStart(2, "0")}:${String(stampedDate.getMinutes()).padStart(2, "0")}`;
 
   const wrapper = document.createElement("div");
+  wrapper.className = "stamp-wrap";
 
   wrapper.innerHTML = `
     <div class="stamp">
       <div>
-        <div class="stamp-name">${escapeHtml(record.stamp.staffName)}</div>
-        <div class="stamp-text">確認済</div>
+        <div class="stamp-name">${escapeHtml(stamp.staffName)}</div>
+        <div class="stamp-text">${periodLabel}確認</div>
       </div>
     </div>
     <div class="stamp-time">${timeText}</div>
   `;
 
-  stampList.appendChild(wrapper);
+  targetElement.appendChild(wrapper);
 }
 
 function renderCalendar() {
@@ -342,13 +385,32 @@ function renderCalendar() {
 
     const morningIcon = record?.morning?.mood ? moodIcons[record.morning.mood] || "▫️" : "";
     const afternoonIcon = record?.afternoon?.mood ? moodIcons[record.afternoon.mood] || "▫️" : "";
-    const stampName = record?.stamp?.staffName || "";
+
+    const morningStampName = record?.morning?.stamp?.staffName || "";
+    const afternoonStampName = record?.afternoon?.stamp?.staffName || "";
 
     cell.innerHTML = `
       <div class="day-number">${day}</div>
-      ${morningIcon ? `<div class="mood-line"><span>午前</span><strong>${morningIcon}</strong></div>` : ""}
-      ${afternoonIcon ? `<div class="mood-line"><span>午後</span><strong>${afternoonIcon}</strong></div>` : ""}
-      ${stampName ? `<div class="calendar-stamp">確認：${escapeHtml(stampName)}</div>` : ""}
+
+      ${morningIcon || morningStampName ? `
+        <div class="mood-line">
+          <div class="mood-line-top">
+            <span>午前</span>
+            <strong>${morningIcon || "▫️"}</strong>
+          </div>
+          ${morningStampName ? `<div class="calendar-stamp">印：${escapeHtml(morningStampName)}</div>` : ""}
+        </div>
+      ` : ""}
+
+      ${afternoonIcon || afternoonStampName ? `
+        <div class="mood-line">
+          <div class="mood-line-top">
+            <span>午後</span>
+            <strong>${afternoonIcon || "▫️"}</strong>
+          </div>
+          ${afternoonStampName ? `<div class="calendar-stamp">印：${escapeHtml(afternoonStampName)}</div>` : ""}
+        </div>
+      ` : ""}
     `;
 
     cell.addEventListener("click", () => {
@@ -407,7 +469,7 @@ function toggleStaffVisibility(index) {
 
   saveStaff(staff);
   renderStaffSettings();
-  renderStaffButtons();
+  renderAllStaffButtons();
 }
 
 function escapeHtml(text) {
@@ -428,7 +490,8 @@ function init() {
   renderCalendar();
   renderStaffSettings();
 
-  saveButton.addEventListener("click", saveCurrentRecord);
+  saveMorningButton.addEventListener("click", saveMorningRecord);
+  saveAfternoonButton.addEventListener("click", saveAfternoonRecord);
   deleteButton.addEventListener("click", deleteCurrentRecord);
 
   dateInput.addEventListener("change", loadFormByDate);
