@@ -1,5 +1,13 @@
-const STORAGE_KEY = "odaLogRecords";
-const STAFF_KEY = "odaLogStaff";
+import { db } from "./firebase.js";
+
+import {
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const CLOUD_DOC_PATH = ["odaLogs", "main"];
 
 const moodIcons = {
   "元気": "☀️",
@@ -57,6 +65,11 @@ const recordDetail = document.getElementById("recordDetail");
 
 let currentCalendarDate = new Date();
 
+let appData = {
+  records: {},
+  staff: []
+};
+
 function getTodayString() {
   return formatDate(new Date());
 }
@@ -69,55 +82,77 @@ function formatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
+async function loadCloudData() {
+  const docRef = doc(db, ...CLOUD_DOC_PATH);
+  const snapshot = await getDoc(docRef);
+
+  if (!snapshot.exists()) {
+    appData = {
+      records: {},
+      staff: defaultStaff
+    };
+
+    await saveCloudData();
+    return;
+  }
+
+  const data = snapshot.data();
+
+  appData = {
+    records: data.records || {},
+    staff: mergeDefaultStaff(data.staff || [])
+  };
+}
+
+async function saveCloudData() {
+  const docRef = doc(db, ...CLOUD_DOC_PATH);
+
+  await setDoc(docRef, {
+    records: appData.records,
+    staff: appData.staff,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+}
+
+function mergeDefaultStaff(savedStaff) {
+  return defaultStaff.map((defaultMember) => {
+    const savedMember = savedStaff.find((member) => member.name === defaultMember.name);
+
+    if (!savedMember) {
+      return defaultMember;
+    }
+
+    return {
+      name: defaultMember.name,
+      visible: savedMember.visible
+    };
+  });
+}
+
 function loadRecords() {
-  const rawData = localStorage.getItem(STORAGE_KEY);
-
-  if (!rawData) {
-    return {};
-  }
-
-  try {
-    return JSON.parse(rawData);
-  } catch (error) {
-    console.error("記録データの読み込みに失敗しました", error);
-    return {};
-  }
+  return appData.records || {};
 }
 
 function saveRecords(records) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  appData.records = records;
+  saveCloudData().catch((error) => {
+    console.error("記録の保存に失敗しました", error);
+    alert("記録の保存に失敗した。通信かFirebase設定を確認してね。");
+  });
 }
 
 function loadStaff() {
-  const rawData = localStorage.getItem(STAFF_KEY);
-
-  if (!rawData) {
-    return defaultStaff;
-  }
-
-  try {
-    const savedStaff = JSON.parse(rawData);
-
-    return defaultStaff.map((defaultMember) => {
-      const savedMember = savedStaff.find((member) => member.name === defaultMember.name);
-
-      if (!savedMember) {
-        return defaultMember;
-      }
-
-      return {
-        name: defaultMember.name,
-        visible: savedMember.visible
-      };
-    });
-  } catch (error) {
-    console.error("職員データの読み込みに失敗しました", error);
-    return defaultStaff;
-  }
+  return appData.staff && appData.staff.length > 0
+    ? appData.staff
+    : defaultStaff;
 }
 
 function saveStaff(staff) {
-  localStorage.setItem(STAFF_KEY, JSON.stringify(staff));
+  appData.staff = staff;
+  saveCloudData().catch((error) => {
+    console.error("職員設定の保存に失敗しました", error);
+    alert("職員設定の保存に失敗した。通信かFirebase設定を確認してね。");
+  });
 }
 
 function createEmptyRecord() {
@@ -487,8 +522,16 @@ function escapeHtml(text) {
     .replaceAll("'", "&#039;");
 }
 
-function init() {
+async function init() {
   dateInput.value = getTodayString();
+
+  try {
+    await loadCloudData();
+  } catch (error) {
+    console.error("Firebase読み込みエラー", error);
+    alert("Firebaseからデータを読み込めなかった。設定を確認してね。");
+    return;
+  }
 
   saveStaff(loadStaff());
 
