@@ -4,18 +4,49 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>小田ログ</title>
+  <title>オダログ</title>
 
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header class="app-header">
     <p class="eyebrow">Self Care Calendar</p>
-    <h1>小田ログ</h1>
+    <h1>オダログ</h1>
     <p class="lead">小田さんの午前と午後の気分を分けて残せるセルフケア記録。</p>
   </header>
 
-  <main class="app-main">
+  <section id="loginView" class="login-view">
+  <div class="login-card">
+    <p class="eyebrow">Login</p>
+    <h2>オダログにログイン</h2>
+
+    <label>
+      メールアドレス
+      <input id="loginEmail" type="email" autocomplete="email" />
+    </label>
+
+    <label>
+      パスワード
+      <input id="loginPassword" type="password" autocomplete="current-password" />
+    </label>
+
+    <button id="loginButton" class="primary-button">ログイン</button>
+
+    <p id="loginError" class="login-error"></p>
+  </div>
+</section>
+
+  <main id="appView" class="app-main hidden">
+
+<section class="card user-bar">
+  <div>
+    <p class="eyebrow">Account</p>
+    <p id="loginUserText" class="login-user-text">ログイン中</p>
+  </div>
+
+  <button id="logoutButton" class="danger-button">ログアウト</button>
+</section>
+    
     <section class="card today-card">
      <div class="date-header">
   <div class="date-title">
