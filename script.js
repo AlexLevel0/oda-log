@@ -389,29 +389,23 @@ function renderCalendar() {
     const morningStampName = record?.morning?.stamp?.staffName || "";
     const afternoonStampName = record?.afternoon?.stamp?.staffName || "";
 
-    cell.innerHTML = `
-      <div class="day-number">${day}</div>
+const hasMorningStamp = Boolean(record?.morning?.stamp);
+const hasAfternoonStamp = Boolean(record?.afternoon?.stamp);
 
-      ${morningIcon || morningStampName ? `
-        <div class="mood-line">
-          <div class="mood-line-top">
-            <span>午前</span>
-            <strong>${morningIcon || "▫️"}</strong>
-          </div>
-          ${morningStampName ? `<div class="calendar-stamp">印：${escapeHtml(morningStampName)}</div>` : ""}
-        </div>
-      ` : ""}
+cell.innerHTML = `
+  <div class="day-number">${day}</div>
 
-      ${afternoonIcon || afternoonStampName ? `
-        <div class="mood-line">
-          <div class="mood-line-top">
-            <span>午後</span>
-            <strong>${afternoonIcon || "▫️"}</strong>
-          </div>
-          ${afternoonStampName ? `<div class="calendar-stamp">印：${escapeHtml(afternoonStampName)}</div>` : ""}
-        </div>
-      ` : ""}
-    `;
+  <div class="day-moods">
+    ${morningIcon ? `<span title="午前">${morningIcon}</span>` : `<span class="empty-mark">-</span>`}
+    <span class="slash">/</span>
+    ${afternoonIcon ? `<span title="午後">${afternoonIcon}</span>` : `<span class="empty-mark">-</span>`}
+  </div>
+
+  <div class="day-stamps">
+    <span class="${hasMorningStamp ? "stamp-ok" : "stamp-none"}">午前${hasMorningStamp ? "◎" : "×"}</span>
+    <span class="${hasAfternoonStamp ? "stamp-ok" : "stamp-none"}">午後${hasAfternoonStamp ? "◎" : "×"}</span>
+  </div>
+`;
 
     cell.addEventListener("click", () => {
       dateInput.value = dateKey;
