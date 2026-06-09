@@ -396,14 +396,14 @@ cell.innerHTML = `
   <div class="day-number">${day}</div>
 
   <div class="day-moods">
-    ${morningIcon ? `<span title="午前">${morningIcon}</span>` : `<span class="empty-mark">-</span>`}
+    ${morningIcon ? `<span>${morningIcon}</span>` : `<span class="empty-mark">-</span>`}
     <span class="slash">/</span>
-    ${afternoonIcon ? `<span title="午後">${afternoonIcon}</span>` : `<span class="empty-mark">-</span>`}
+    ${afternoonIcon ? `<span>${afternoonIcon}</span>` : `<span class="empty-mark">-</span>`}
   </div>
 
   <div class="day-stamps">
-    <span class="${hasMorningStamp ? "stamp-ok" : "stamp-none"}">午前${hasMorningStamp ? "◎" : "×"}</span>
-    <span class="${hasAfternoonStamp ? "stamp-ok" : "stamp-none"}">午後${hasAfternoonStamp ? "◎" : "×"}</span>
+    <span class="${hasMorningStamp ? "stamp-ok" : "stamp-none"}">朝${hasMorningStamp ? "◎" : "×"}</span>
+    <span class="${hasAfternoonStamp ? "stamp-ok" : "stamp-none"}">昼${hasAfternoonStamp ? "◎" : "×"}</span>
   </div>
 `;
 
