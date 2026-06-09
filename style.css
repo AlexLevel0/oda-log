@@ -4,7 +4,7 @@
 
 :root {
   --bg: #fbf7f2;
-  --card: rgba(255, 255, 255, 0.9);
+  --card: rgba(255, 255, 255, 0.92);
   --text: #2d2430;
   --sub: #7c7078;
   --muted: #b8aab1;
@@ -111,6 +111,7 @@ h4 {
 
 .card {
   padding: 20px;
+  overflow: hidden;
 }
 
 .mini-card {
@@ -125,9 +126,61 @@ h4 {
   margin-bottom: 16px;
 }
 
-#dateInput {
-  width: 170px;
+/* 記録する日 */
+
+.date-header {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 18px;
 }
+
+.date-title h2 {
+  margin-bottom: 0;
+}
+
+.date-label {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  color: #5f4e59;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.date-label span {
+  padding-left: 4px;
+}
+
+#dateInput {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  border: 1px solid rgba(120, 80, 100, 0.18);
+  border-radius: 16px;
+  padding: 0 12px;
+  color: var(--text);
+  background-color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 48px;
+  outline: none;
+}
+
+#dateInput::-webkit-date-and-time-value {
+  min-height: 48px;
+  text-align: left;
+}
+
+#dateInput::-webkit-calendar-picker-indicator {
+  opacity: 0.65;
+}
+
+/* フォーム */
 
 .form-grid {
   display: grid;
@@ -186,6 +239,7 @@ textarea:focus {
 }
 
 .primary-button {
+  width: 100%;
   color: #fff;
   background: var(--text);
 }
@@ -196,10 +250,14 @@ textarea:focus {
 }
 
 .action-row {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 10px;
   margin-top: 18px;
+}
+
+.action-row .danger-button {
+  width: 100%;
 }
 
 /* ハンコ */
@@ -210,17 +268,23 @@ textarea:focus {
   border-top: 1px dashed rgba(120, 80, 100, 0.22);
 }
 
-.staff-buttons,
-.stamp-list,
-.staff-settings-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+.staff-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .staff-button {
+  width: 100%;
+  min-width: 0;
+  border-radius: 14px;
+  padding: 10px 8px;
   color: #6f4050;
   background: var(--pink-soft);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+  white-space: normal;
 }
 
 .staff-button.active {
@@ -229,6 +293,9 @@ textarea:focus {
 }
 
 .stamp-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-top: 14px;
 }
 
@@ -275,12 +342,12 @@ textarea:focus {
 }
 
 .month-controls button {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   padding: 0;
   color: var(--blue);
   background: #f4e8ef;
-  font-size: 26px;
+  font-size: 24px;
 }
 
 #monthLabel {
@@ -304,24 +371,30 @@ textarea:focus {
 .calendar {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 6px;
+  gap: 5px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .calendar-weekdays {
   margin-bottom: 8px;
   color: #a27586;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
   text-align: center;
+}
+
+.calendar-weekdays span {
+  min-width: 0;
 }
 
 .day-cell {
   min-width: 0;
   width: 100%;
-  min-height: 90px;
+  min-height: 74px;
   border: 1px solid rgba(120, 80, 100, 0.14);
-  border-radius: 18px;
-  padding: 8px 4px;
+  border-radius: 14px;
+  padding: 6px 2px;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.76);
   text-align: center;
@@ -340,9 +413,9 @@ textarea:focus {
 }
 
 .day-number {
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   color: var(--blue);
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 900;
   line-height: 1;
 }
@@ -351,31 +424,31 @@ textarea:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  margin: 6px 0;
-  font-size: 18px;
+  gap: 2px;
+  margin: 4px 0;
+  font-size: 14px;
   line-height: 1;
   white-space: nowrap;
 }
 
 .slash {
   color: #b59aa6;
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 900;
 }
 
 .empty-mark {
   color: #d0c0c8;
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 900;
 }
 
 .day-stamps {
   display: grid;
-  gap: 2px;
-  font-size: 10px;
+  gap: 1px;
+  font-size: 8px;
   font-weight: 900;
-  line-height: 1.2;
+  line-height: 1.1;
 }
 
 .stamp-ok {
@@ -388,38 +461,17 @@ textarea:focus {
   white-space: nowrap;
 }
 
-/* 旧表示が残ってても崩れないようにする */
-
-.mood-line {
-  display: grid;
-  gap: 2px;
-  margin-top: 4px;
-  padding: 4px;
-  border-radius: 12px;
-  background: var(--pink-bg);
-  color: #65535d;
-  font-size: 10px;
-  font-weight: 800;
-}
-
-.mood-line-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2px;
-}
-
-.calendar-stamp {
-  color: var(--red);
-  font-size: 10px;
-  font-weight: 900;
-  white-space: nowrap;
-}
-
 /* 職員設定 */
 
+.staff-settings-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
 .staff-setting-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   gap: 8px;
   align-items: center;
   padding: 10px;
@@ -433,6 +485,7 @@ textarea:focus {
 }
 
 .staff-toggle-button {
+  min-width: 64px;
   color: #5c4b56;
   background: #f0e8ed;
 }
@@ -486,6 +539,12 @@ textarea:focus {
     gap: 10px;
   }
 
+  .date-header {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .date-label,
   #dateInput {
     width: 100%;
   }
@@ -497,12 +556,6 @@ textarea:focus {
   .month-controls {
     width: 100%;
     justify-content: space-between;
-  }
-
-  .month-controls button {
-    width: 54px;
-    height: 54px;
-    font-size: 24px;
   }
 
   #monthLabel {
@@ -517,38 +570,7 @@ textarea:focus {
 
   .calendar-weekdays,
   .calendar {
-    gap: 5px;
-  }
-
-  .calendar-weekdays {
-    font-size: 12px;
-  }
-
-  .day-cell {
-    min-height: 78px;
-    padding: 7px 3px;
-    border-radius: 15px;
-  }
-
-  .day-number {
-    margin-bottom: 5px;
-    font-size: 17px;
-  }
-
-  .day-moods {
-    margin: 4px 0;
-    gap: 2px;
-    font-size: 16px;
-  }
-
-  .slash,
-  .empty-mark {
-    font-size: 11px;
-  }
-
-  .day-stamps {
-    gap: 1px;
-    font-size: 9px;
+    gap: 4px;
   }
 
   .stamp {
@@ -565,7 +587,11 @@ textarea:focus {
   }
 }
 
-/* かなり狭いスマホ */
+@media (max-width: 420px) {
+  .staff-buttons {
+    grid-template-columns: 1fr;
+  }
+}
 
 @media (max-width: 390px) {
   .card {
@@ -578,246 +604,19 @@ textarea:focus {
   }
 
   .day-cell {
-    min-height: 72px;
-    padding: 6px 2px;
+    min-height: 70px;
     border-radius: 13px;
   }
 
   .day-number {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .day-moods {
-    font-size: 15px;
+    font-size: 13px;
   }
 
   .day-stamps {
     font-size: 8px;
-  }
-}
-
-/* カレンダー強制スマホ調整 */
-.card {
-  overflow: hidden;
-}
-
-.calendar-weekdays,
-.calendar {
-  width: 100%;
-  max-width: 100%;
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 4px;
-}
-
-.calendar-weekdays span {
-  min-width: 0;
-  text-align: center;
-}
-
-.day-cell {
-  min-width: 0;
-  width: 100%;
-  max-width: 100%;
-  min-height: 70px;
-  padding: 6px 2px;
-  border-radius: 14px;
-  overflow: hidden;
-  text-align: center;
-}
-
-.day-number {
-  margin-bottom: 4px;
-  font-size: 15px;
-  line-height: 1;
-}
-
-.day-moods {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2px;
-  margin: 4px 0;
-  font-size: 14px;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.day-stamps {
-  display: grid;
-  gap: 1px;
-  font-size: 8px;
-  line-height: 1.1;
-  font-weight: 900;
-}
-
-.stamp-ok,
-.stamp-none {
-  white-space: nowrap;
-}
-
-.slash,
-.empty-mark {
-  font-size: 10px;
-}
-
-/* 記録する日のレイアウト調整 */
-.today-card > .section-title-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-}
-
-.today-card #dateInput {
-  width: 170px;
-}
-
-/* スマホでは日付入力を下に綺麗に出す */
-@media (max-width: 760px) {
-  .today-card > .section-title-row {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .today-card #dateInput {
-    width: 100%;
-    max-width: none;
-  }
-}
-
-.date-title-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-}
-
-.date-input-wrap {
-  width: 170px;
-}
-
-.date-input-wrap #dateInput {
-  width: 100%;
-}
-
-@media (max-width: 760px) {
-  .date-title-row {
-    grid-template-columns: 1fr;
-  }
-
-  .date-input-wrap {
-    width: 100%;
-  }
-}
-
-/* 記録する日 専用レイアウト */
-.date-header {
-  display: grid;
-  grid-template-columns: 1fr 180px;
-  gap: 16px;
-  align-items: end;
-  margin-bottom: 18px;
-}
-
-.date-title h2 {
-  margin-bottom: 0;
-}
-
-.date-label {
-  display: grid;
-  gap: 6px;
-  margin: 0;
-  color: #5f4e59;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.date-label span {
-  padding-left: 4px;
-}
-
-.date-label #dateInput {
-  width: 100%;
-  min-width: 0;
-}
-
-/* 既存指定を打ち消す */
-.today-card > .section-title-row {
-  display: unset;
-}
-
-@media (max-width: 760px) {
-  .date-header {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .date-label {
-    width: 100%;
-  }
-
-  .date-label #dateInput {
-    width: 100%;
-  }
-}
-
-
-/* 日付入力ボタンの崩れ対策 */
-#dateInput {
-  appearance: none;
-  -webkit-appearance: none;
-  display: block;
-  width: 100%;
-  min-width: 0;
-  height: 48px;
-  border: 1px solid rgba(120, 80, 100, 0.18);
-  border-radius: 16px;
-  padding: 0 12px;
-  color: #2d2430;
-  background-color: #ffffff;
-  font-size: 16px;
-  font-weight: 800;
-  line-height: 48px;
-}
-
-/* iPhone Safariの中身ズレ対策 */
-#dateInput::-webkit-date-and-time-value {
-  min-height: 48px;
-  text-align: left;
-}
-
-#dateInput::-webkit-calendar-picker-indicator {
-  opacity: 0.65;
-}
-
-/* 記録する日エリア */
-.date-header {
-  display: grid;
-  grid-template-columns: 1fr 180px;
-  gap: 16px;
-  align-items: end;
-  margin-bottom: 18px;
-}
-
-.date-label {
-  display: grid;
-  gap: 6px;
-  margin: 0;
-  width: 100%;
-}
-
-.date-label span {
-  color: #5f4e59;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-@media (max-width: 760px) {
-  .date-header {
-    grid-template-columns: 1fr;
-  }
-
-  .date-label,
-  #dateInput {
-    width: 100%;
   }
 }
