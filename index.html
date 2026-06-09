@@ -64,8 +64,17 @@
             <h4>午前の確認スタンプ</h4>
             <p class="hint">午前の記録を確認した職員のハンコを押す。</p>
 
-            <div id="morningStaffButtons" class="staff-buttons"></div>
-            <div id="morningStampDisplay" class="stamp-list"></div>
+            <div class="stamp-select-row">
+  <select id="morningStaffSelect">
+    <option value="">職員を選択</option>
+  </select>
+
+  <button id="morningStampButton" class="stamp-submit-button">
+    午前のハンコを押す
+  </button>
+</div>
+
+<div id="morningStampDisplay" class="stamp-list"></div>
           </div>
         </section>
 
@@ -103,8 +112,17 @@
             <h4>午後の確認スタンプ</h4>
             <p class="hint">午後の記録を確認した職員のハンコを押す。</p>
 
-            <div id="afternoonStaffButtons" class="staff-buttons"></div>
-            <div id="afternoonStampDisplay" class="stamp-list"></div>
+            <div class="stamp-select-row">
+  <select id="afternoonStaffSelect">
+    <option value="">職員を選択</option>
+  </select>
+
+  <button id="afternoonStampButton" class="stamp-submit-button">
+    午後のハンコを押す
+  </button>
+</div>
+
+<div id="afternoonStampDisplay" class="stamp-list"></div>
           </div>
         </section>
       </div>
