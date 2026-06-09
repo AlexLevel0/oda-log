@@ -171,7 +171,7 @@ function loadFormByDate() {
   afternoonImpression.value = record.afternoon.impression;
 
   renderAllStaffSelects();
-renderAllStamps();
+  renderAllStamps();
 }
 
 function saveMorningRecord() {
@@ -309,37 +309,6 @@ function renderStaffSelect(period) {
   });
 }
 
-function renderStaffButtons(period) {
-  const staff = loadStaff();
-  const visibleStaff = staff.filter((member) => member.visible);
-  const record = getSelectedDateRecord();
-
-  const targetElement = period === "morning"
-    ? morningStaffButtons
-    : afternoonStaffButtons;
-
-  targetElement.innerHTML = "";
-
-  if (visibleStaff.length === 0) {
-    targetElement.innerHTML = `<p class="hint">表示中の職員がいないよ。職員設定でONにしてね。</p>`;
-    return;
-  }
-
-  visibleStaff.forEach((member) => {
-    const button = document.createElement("button");
-    const isStamped = record[period].stamp && record[period].stamp.staffName === member.name;
-
-    button.className = isStamped ? "staff-button active" : "staff-button";
-    button.textContent = isStamped ? `${member.name} の確認印` : `${member.name} のハンコ`;
-
-    button.addEventListener("click", () => {
-      setStamp(period, member.name);
-    });
-
-    targetElement.appendChild(button);
-  });
-}
-
 function renderAllStamps() {
   renderStamp("morning");
   renderStamp("afternoon");
@@ -418,26 +387,23 @@ function renderCalendar() {
     const morningIcon = record?.morning?.mood ? moodIcons[record.morning.mood] || "▫️" : "";
     const afternoonIcon = record?.afternoon?.mood ? moodIcons[record.afternoon.mood] || "▫️" : "";
 
-    const morningStampName = record?.morning?.stamp?.staffName || "";
-    const afternoonStampName = record?.afternoon?.stamp?.staffName || "";
+    const hasMorningStamp = Boolean(record?.morning?.stamp);
+    const hasAfternoonStamp = Boolean(record?.afternoon?.stamp);
 
-const hasMorningStamp = Boolean(record?.morning?.stamp);
-const hasAfternoonStamp = Boolean(record?.afternoon?.stamp);
+    cell.innerHTML = `
+      <div class="day-number">${day}</div>
 
-cell.innerHTML = `
-  <div class="day-number">${day}</div>
+      <div class="day-moods">
+        ${morningIcon ? `<span>${morningIcon}</span>` : `<span class="empty-mark">-</span>`}
+        <span class="slash">/</span>
+        ${afternoonIcon ? `<span>${afternoonIcon}</span>` : `<span class="empty-mark">-</span>`}
+      </div>
 
-  <div class="day-moods">
-    ${morningIcon ? `<span>${morningIcon}</span>` : `<span class="empty-mark">-</span>`}
-    <span class="slash">/</span>
-    ${afternoonIcon ? `<span>${afternoonIcon}</span>` : `<span class="empty-mark">-</span>`}
-  </div>
-
-  <div class="day-stamps">
-    <span class="${hasMorningStamp ? "stamp-ok" : "stamp-none"}">朝${hasMorningStamp ? "◎" : "×"}</span>
-    <span class="${hasAfternoonStamp ? "stamp-ok" : "stamp-none"}">昼${hasAfternoonStamp ? "◎" : "×"}</span>
-  </div>
-`;
+      <div class="day-stamps">
+        <span class="${hasMorningStamp ? "stamp-ok" : "stamp-none"}">朝${hasMorningStamp ? "◎" : "×"}</span>
+        <span class="${hasAfternoonStamp ? "stamp-ok" : "stamp-none"}">昼${hasAfternoonStamp ? "◎" : "×"}</span>
+      </div>
+    `;
 
     cell.addEventListener("click", () => {
       dateInput.value = dateKey;
@@ -521,12 +487,12 @@ function init() {
   deleteButton.addEventListener("click", deleteCurrentRecord);
 
   morningStampButton.addEventListener("click", () => {
-  setStamp("morning");
-});
+    setStamp("morning");
+  });
 
-afternoonStampButton.addEventListener("click", () => {
-  setStamp("afternoon");
-});
+  afternoonStampButton.addEventListener("click", () => {
+    setStamp("afternoon");
+  });
 
   dateInput.addEventListener("change", loadFormByDate);
 
