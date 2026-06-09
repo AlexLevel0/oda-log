@@ -188,7 +188,8 @@ function saveMorningRecord() {
   saveRecords(records);
 
   renderCalendar();
-  alert("午前の記録を保存したぞ。");
+renderRecordDetail(selectedDate);
+alert("午前の記録を保存したぞ。");
 }
 
 function saveAfternoonRecord() {
@@ -204,7 +205,8 @@ function saveAfternoonRecord() {
   saveRecords(records);
 
   renderCalendar();
-  alert("午後の記録を保存したぞ。");
+renderRecordDetail(selectedDate);
+alert("午後の記録を保存したぞ。");
 }
 
 function saveCurrentPeriodSilently(period) {
@@ -279,6 +281,7 @@ function setStamp(period) {
   renderStaffSelect(period);
   renderStamp(period);
   renderCalendar();
+  renderRecordDetail(selectedDate);
 }
 
 function renderAllStaffSelects() {
@@ -407,14 +410,10 @@ function renderCalendar() {
     `;
 
     cell.addEventListener("click", () => {
-      dateInput.value = dateKey;
-      loadFormByDate();
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-    });
+  dateInput.value = dateKey;
+  loadFormByDate();
+  renderRecordDetail(dateKey);
+});
 
     calendar.appendChild(cell);
   }
@@ -519,7 +518,97 @@ function init() {
 }
 
 
+function renderRecordDetail(dateKey) {
+  const records = loadRecords();
+  const record = records[dateKey] ? normalizeRecord(records[dateKey]) : null;
 
+  if (!record) {
+    recordDetail.innerHTML = `
+      <p class="detail-date">${dateKey}</p>
+      <p class="hint">この日の記録はまだないよ。</p>
+    `;
+    return;
+  }
+
+  const morningMoodText = record.morning.mood
+    ? `${moodIcons[record.morning.mood] || ""} ${record.morning.mood}`
+    : "未記録";
+
+  const afternoonMoodText = record.afternoon.mood
+    ? `${moodIcons[record.afternoon.mood] || ""} ${record.afternoon.mood}`
+    : "未記録";
+
+  const morningStampText = formatStampText(record.morning.stamp);
+  const afternoonStampText = formatStampText(record.afternoon.stamp);
+
+  recordDetail.innerHTML = `
+    <p class="detail-date">${dateKey}</p>
+
+    <div class="detail-grid">
+      <section class="detail-card">
+        <h3>午前</h3>
+
+        <p class="detail-row">
+          <span class="detail-label">気分：</span>
+          ${escapeHtml(morningMoodText)}
+        </p>
+
+        <p class="detail-row">
+          <span class="detail-label">今日やりたいこと：</span><br>
+          ${escapeHtml(record.morning.todo || "未記入")}
+        </p>
+
+        <p class="detail-row">
+          <span class="detail-label">ひとこと：</span><br>
+          ${escapeHtml(record.morning.note || "未記入")}
+        </p>
+
+        <p class="detail-stamp">
+          確認：${escapeHtml(morningStampText)}
+        </p>
+      </section>
+
+      <section class="detail-card">
+        <h3>午後</h3>
+
+        <p class="detail-row">
+          <span class="detail-label">気分：</span>
+          ${escapeHtml(afternoonMoodText)}
+        </p>
+
+        <p class="detail-row">
+          <span class="detail-label">なにをやったか：</span><br>
+          ${escapeHtml(record.afternoon.done || "未記入")}
+        </p>
+
+        <p class="detail-row">
+          <span class="detail-label">感想：</span><br>
+          ${escapeHtml(record.afternoon.impression || "未記入")}
+        </p>
+
+        <p class="detail-stamp">
+          確認：${escapeHtml(afternoonStampText)}
+        </p>
+      </section>
+    </div>
+  `;
+}
+
+function formatStampText(stamp) {
+  if (!stamp) {
+    return "未確認";
+  }
+
+  const stampedDate = new Date(stamp.stampedAt);
+
+  if (Number.isNaN(stampedDate.getTime())) {
+    return stamp.staffName;
+  }
+
+  const timeText = `${String(stampedDate.getHours()).padStart(2, "0")}:${String(stampedDate.getMinutes()).padStart(2, "0")}`;
+
+  return `${stamp.staffName} ${timeText}`;
+}
 
 
 init();
