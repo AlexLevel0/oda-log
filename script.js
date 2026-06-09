@@ -1,4 +1,4 @@
-import { db } from "./firebase.js";
+import { db, auth } from "./firebase.js";
 
 import {
   doc,
@@ -6,6 +6,12 @@ import {
   setDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+import {
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 const CLOUD_DOC_PATH = ["odaLogs", "main"];
 
@@ -63,7 +69,54 @@ const nextMonthButton = document.getElementById("nextMonthButton");
 const staffSettingsList = document.getElementById("staffSettingsList");
 const recordDetail = document.getElementById("recordDetail");
 
+const loginView = document.getElementById("loginView");
+const appView = document.getElementById("appView");
+
+const loginEmail = document.getElementById("loginEmail");
+const loginPassword = document.getElementById("loginPassword");
+const loginButton = document.getElementById("loginButton");
+const loginError = document.getElementById("loginError");
+
+const logoutButton = document.getElementById("logoutButton");
+const loginUserText = document.getElementById("loginUserText");
+
 let currentCalendarDate = new Date();
+
+let currentUser = null;
+let currentRole = "staff";
+
+const OWNER_EMAILS = [
+  "mitsuhashipaintart@gmail.com"
+];
+
+function getUserRole(user) {
+  if (!user || !user.email) {
+    return "staff";
+  }
+
+  return OWNER_EMAILS.includes(user.email) ? "owner" : "staff";
+}
+
+function applyRoleView() {
+  const isOwner = currentRole === "owner";
+
+  const staffSettingsCard = staffSettingsList.closest(".card");
+  if (staffSettingsCard) {
+    staffSettingsCard.classList.toggle("hidden", !isOwner);
+  }
+
+  deleteButton.classList.toggle("hidden", !isOwner);
+
+  morningMood.disabled = !isOwner;
+  morningTodo.disabled = !isOwner;
+  morningNote.disabled = !isOwner;
+  afternoonMood.disabled = !isOwner;
+  afternoonDone.disabled = !isOwner;
+  afternoonImpression.disabled = !isOwner;
+
+  saveMorningButton.classList.toggle("hidden", !isOwner);
+  saveAfternoonButton.classList.toggle("hidden", !isOwner);
+}
 
 let appData = {
   records: {},
@@ -214,6 +267,12 @@ function loadFormByDate() {
 }
 
 function saveMorningRecord() {
+
+  if (currentRole !== "owner") {
+  alert("職員アカウントでは記録本文を編集できません。");
+  return;
+}
+  
   const records = loadRecords();
   const selectedDate = dateInput.value;
   const record = normalizeRecord(records[selectedDate]);
@@ -231,6 +290,12 @@ alert("午前の記録を保存したぞ。");
 }
 
 function saveAfternoonRecord() {
+
+  if (currentRole !== "owner") {
+  alert("職員アカウントでは記録本文を編集できません。");
+  return;
+}
+  
   const records = loadRecords();
   const selectedDate = dateInput.value;
   const record = normalizeRecord(records[selectedDate]);
@@ -269,6 +334,12 @@ function saveCurrentPeriodSilently(period) {
 }
 
 function deleteCurrentRecord() {
+
+  if (currentRole !== "owner") {
+  alert("職員アカウントでは記録本文を編集できません。");
+  return;
+}
+  
   const selectedDate = dateInput.value;
   const records = loadRecords();
 
@@ -522,22 +593,40 @@ function escapeHtml(text) {
     .replaceAll("'", "&#039;");
 }
 
-async function init() {
-  dateInput.value = getTodayString();
+async function login() {
+  loginError.textContent = "";
 
-  try {
-    await loadCloudData();
-  } catch (error) {
-    console.error("Firebase読み込みエラー", error);
-    alert("Firebaseからデータを読み込めなかった。設定を確認してね。");
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value;
+
+  if (!email || !password) {
+    loginError.textContent = "メールアドレスとパスワードを入力してね。";
     return;
   }
 
-  saveStaff(loadStaff());
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    console.error("ログイン失敗", error);
+    loginError.textContent = "ログインに失敗しました。メールアドレスかパスワードを確認してね。";
+  }
+}
 
-  loadFormByDate();
-  renderCalendar();
-  renderStaffSettings();
+async function logout() {
+  await signOut(auth);
+}
+function init() {
+  dateInput.value = getTodayString();
+
+  loginButton.addEventListener("click", login);
+
+  loginPassword.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      login();
+    }
+  });
+
+  logoutButton.addEventListener("click", logout);
 
   saveMorningButton.addEventListener("click", saveMorningRecord);
   saveAfternoonButton.addEventListener("click", saveAfternoonRecord);
@@ -572,8 +661,42 @@ async function init() {
 
     renderCalendar();
   });
-}
 
+  onAuthStateChanged(auth, async (user) => {
+    currentUser = user;
+
+    if (!user) {
+      loginView.classList.remove("hidden");
+      appView.classList.add("hidden");
+      loginUserText.textContent = "";
+      return;
+    }
+
+    currentRole = getUserRole(user);
+
+    loginView.classList.add("hidden");
+    appView.classList.remove("hidden");
+    loginUserText.textContent = `${user.email} でログイン中`;
+
+    try {
+      await loadCloudData();
+      saveStaff(loadStaff());
+
+      loadFormByDate();
+      renderCalendar();
+      renderStaffSettings();
+
+      if (typeof renderRecordDetail === "function") {
+        renderRecordDetail(dateInput.value);
+      }
+
+      applyRoleView();
+    } catch (error) {
+      console.error("Firebase読み込みエラー", error);
+      alert("Firebaseからデータを読み込めなかった。設定を確認してね。");
+    }
+  });
+}
 
 function renderRecordDetail(dateKey) {
   const records = loadRecords();
