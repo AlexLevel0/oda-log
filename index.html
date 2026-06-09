@@ -61,7 +61,7 @@
 </div>
 
       <div class="form-grid">
-        <section class="mini-card">
+        <section class="mini-card owner-only">
           <h3>午前の記録</h3>
 
           <label>
@@ -115,7 +115,7 @@
           </div>
         </section>
 
-        <section class="mini-card">
+        <section class="mini-card owner-only">
           <h3>午後の記録</h3>
 
           <label>
@@ -170,7 +170,7 @@
         </section>
       </div>
 
-      <div class="action-row">
+      <div class="action-row owner-only">
         <button id="deleteButton" class="danger-button">この日の記録を削除</button>
       </div>
     </section>
@@ -228,9 +228,59 @@
 </section>
 
 
+<section class="card staff-only">
+  <div class="section-title-row">
+    <div>
+      <p class="eyebrow">Staff Check</p>
+      <h2>職員確認</h2>
+    </div>
+  </div>
+
+  <div class="form-grid">
+    <section class="mini-card">
+      <h3>午前の確認</h3>
+
+      <div class="stamp-select-row">
+        <select id="staffMorningStaffSelect">
+          <option value="">職員を選択</option>
+        </select>
+
+        <textarea
+          id="staffMorningStaffComment"
+          rows="3"
+          placeholder="午前の職員コメント"
+        ></textarea>
+
+        <button id="staffMorningStampButton" class="stamp-submit-button">
+          午前の確認を保存
+        </button>
+      </div>
+    </section>
+
+    <section class="mini-card">
+      <h3>午後の確認</h3>
+
+      <div class="stamp-select-row">
+        <select id="staffAfternoonStaffSelect">
+          <option value="">職員を選択</option>
+        </select>
+
+        <textarea
+          id="staffAfternoonStaffComment"
+          rows="3"
+          placeholder="午後の職員コメント"
+        ></textarea>
+
+        <button id="staffAfternoonStampButton" class="stamp-submit-button">
+          午後の確認を保存
+        </button>
+      </div>
+    </section>
+  </div>
+</section>
     
 
-    <section class="card">
+    <section class="card owner-only">
       <div class="section-title-row">
         <div>
           <p class="eyebrow">Staff</p>
