@@ -3,7 +3,10 @@ import { db, auth } from "./firebase.js";
 import {
   doc,
   getDoc,
+  getDocs,
   setDoc,
+  deleteDoc,
+  collection,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
@@ -13,7 +16,11 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-const CLOUD_DOC_PATH = ["odaLogs", "main"];
+const SETTINGS_DOC_PATH = ["settings", "main"];
+
+const OWNER_EMAILS = [
+  "mitsuhashipaintart@gmail.com"
+];
 
 const moodIcons = {
   "元気": "☀️",
@@ -27,16 +34,27 @@ const moodIcons = {
 
 const defaultStaff = [
   { name: "手塚さん", visible: true },
-  { name: "古積さん", visible: true },
   { name: "伊藤さん", visible: true },
   { name: "島田さん", visible: true },
-  { name: "駒谷さん", visible: true },
   { name: "久住さん", visible: true },
+  { name: "古積さん", visible: true },
+  { name: "駒谷さん", visible: true },
   { name: "山崎さん", visible: false },
   { name: "職員A", visible: false },
   { name: "職員B", visible: false },
   { name: "職員C", visible: false }
 ];
+
+const loginView = document.getElementById("loginView");
+const appView = document.getElementById("appView");
+
+const loginEmail = document.getElementById("loginEmail");
+const loginPassword = document.getElementById("loginPassword");
+const loginButton = document.getElementById("loginButton");
+const loginError = document.getElementById("loginError");
+
+const logoutButton = document.getElementById("logoutButton");
+const loginUserText = document.getElementById("loginUserText");
 
 const dateInput = document.getElementById("dateInput");
 
@@ -72,54 +90,10 @@ const nextMonthButton = document.getElementById("nextMonthButton");
 const staffSettingsList = document.getElementById("staffSettingsList");
 const recordDetail = document.getElementById("recordDetail");
 
-const loginView = document.getElementById("loginView");
-const appView = document.getElementById("appView");
-
-const loginEmail = document.getElementById("loginEmail");
-const loginPassword = document.getElementById("loginPassword");
-const loginButton = document.getElementById("loginButton");
-const loginError = document.getElementById("loginError");
-
-const logoutButton = document.getElementById("logoutButton");
-const loginUserText = document.getElementById("loginUserText");
-
 let currentCalendarDate = new Date();
 
 let currentUser = null;
 let currentRole = "staff";
-
-const OWNER_EMAILS = [
-  "mitsuhashipaintart@gmail.com"
-];
-
-function getUserRole(user) {
-  if (!user || !user.email) {
-    return "staff";
-  }
-
-  return OWNER_EMAILS.includes(user.email) ? "owner" : "staff";
-}
-
-function applyRoleView() {
-  const isOwner = currentRole === "owner";
-
-  const staffSettingsCard = staffSettingsList.closest(".card");
-  if (staffSettingsCard) {
-    staffSettingsCard.classList.toggle("hidden", !isOwner);
-  }
-
-  deleteButton.classList.toggle("hidden", !isOwner);
-
-  morningMood.disabled = !isOwner;
-  morningTodo.disabled = !isOwner;
-  morningNote.disabled = !isOwner;
-  afternoonMood.disabled = !isOwner;
-  afternoonDone.disabled = !isOwner;
-  afternoonImpression.disabled = !isOwner;
-
-  saveMorningButton.classList.toggle("hidden", !isOwner);
-  saveAfternoonButton.classList.toggle("hidden", !isOwner);
-}
 
 let appData = {
   records: {},
@@ -138,36 +112,83 @@ function formatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
-async function loadCloudData() {
-  const docRef = doc(db, ...CLOUD_DOC_PATH);
-  const snapshot = await getDoc(docRef);
+function getUserRole(user) {
+  if (!user || !user.email) {
+    return "staff";
+  }
 
-  if (!snapshot.exists()) {
-    appData = {
-      records: {},
-      staff: defaultStaff
-    };
+  return OWNER_EMAILS.includes(user.email) ? "owner" : "staff";
+}
 
-    await saveCloudData();
+function applyRoleView() {
+  const isOwner = currentRole === "owner";
+
+  const staffSettingsCard = staffSettingsList.closest(".card");
+
+  if (staffSettingsCard) {
+    staffSettingsCard.classList.toggle("hidden", !isOwner);
+  }
+
+  deleteButton.classList.toggle("hidden", !isOwner);
+  saveMorningButton.classList.toggle("hidden", !isOwner);
+  saveAfternoonButton.classList.toggle("hidden", !isOwner);
+
+  morningMood.disabled = !isOwner;
+  morningTodo.disabled = !isOwner;
+  morningNote.disabled = !isOwner;
+
+  afternoonMood.disabled = !isOwner;
+  afternoonDone.disabled = !isOwner;
+  afternoonImpression.disabled = !isOwner;
+}
+
+async function login() {
+  loginError.textContent = "";
+
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value;
+
+  if (!email || !password) {
+    loginError.textContent = "メールアドレスとパスワードを入力してね。";
     return;
   }
 
-  const data = snapshot.data();
-
-  appData = {
-    records: data.records || {},
-    staff: mergeDefaultStaff(data.staff || [])
-  };
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    console.error("ログイン失敗", error);
+    loginError.textContent = "ログインに失敗しました。メールアドレスかパスワードを確認してね。";
+  }
 }
 
-async function saveCloudData() {
-  const docRef = doc(db, ...CLOUD_DOC_PATH);
+async function logout() {
+  await signOut(auth);
+}
 
-  await setDoc(docRef, {
-    records: appData.records,
-    staff: appData.staff,
-    updatedAt: serverTimestamp()
-  }, { merge: true });
+async function loadCloudData() {
+  const settingsRef = doc(db, ...SETTINGS_DOC_PATH);
+  const settingsSnap = await getDoc(settingsRef);
+
+  if (!settingsSnap.exists()) {
+    appData.staff = defaultStaff;
+
+    await setDoc(settingsRef, {
+      staff: defaultStaff,
+      updatedAt: serverTimestamp()
+    });
+  } else {
+    const settingsData = settingsSnap.data();
+    appData.staff = mergeDefaultStaff(settingsData.staff || []);
+  }
+
+  const recordsSnap = await getDocs(collection(db, "records"));
+  const records = {};
+
+  recordsSnap.forEach((recordDoc) => {
+    records[recordDoc.id] = normalizeRecord(recordDoc.data());
+  });
+
+  appData.records = records;
 }
 
 function mergeDefaultStaff(savedStaff) {
@@ -189,26 +210,49 @@ function loadRecords() {
   return appData.records || {};
 }
 
-function saveRecords(records) {
-  appData.records = records;
-  saveCloudData().catch((error) => {
-    console.error("記録の保存に失敗しました", error);
-    alert("記録の保存に失敗した。通信かFirebase設定を確認してね。");
-  });
-}
-
 function loadStaff() {
   return appData.staff && appData.staff.length > 0
     ? appData.staff
     : defaultStaff;
 }
 
-function saveStaff(staff) {
+async function saveStaffToCloud(staff) {
   appData.staff = staff;
-  saveCloudData().catch((error) => {
+
+  const settingsRef = doc(db, ...SETTINGS_DOC_PATH);
+
+  await setDoc(settingsRef, {
+    staff: staff,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+}
+
+function saveStaff(staff) {
+  saveStaffToCloud(staff).catch((error) => {
     console.error("職員設定の保存に失敗しました", error);
-    alert("職員設定の保存に失敗した。通信かFirebase設定を確認してね。");
+    alert("職員設定の保存に失敗した。");
   });
+}
+
+async function saveRecordToCloud(dateKey, record) {
+  const normalizedRecord = normalizeRecord(record);
+
+  appData.records[dateKey] = normalizedRecord;
+
+  const recordRef = doc(db, "records", dateKey);
+
+  await setDoc(recordRef, {
+    ...normalizedRecord,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+}
+
+async function deleteRecordFromCloud(dateKey) {
+  delete appData.records[dateKey];
+
+  const recordRef = doc(db, "records", dateKey);
+
+  await deleteDoc(recordRef);
 }
 
 function createEmptyRecord() {
@@ -267,55 +311,71 @@ function loadFormByDate() {
 
   renderAllStaffSelects();
   renderAllStamps();
+
+  if (typeof renderRecordDetail === "function") {
+    renderRecordDetail(dateInput.value);
+  }
 }
 
-function saveMorningRecord() {
-
+async function saveMorningRecord() {
   if (currentRole !== "owner") {
-  alert("職員アカウントでは記録本文を編集できません。");
-  return;
-}
-  
-  const records = loadRecords();
+    alert("職員アカウントでは記録本文を編集できません。");
+    return;
+  }
+
   const selectedDate = dateInput.value;
+  const records = loadRecords();
   const record = normalizeRecord(records[selectedDate]);
 
   record.morning.mood = morningMood.value;
   record.morning.todo = morningTodo.value.trim();
   record.morning.note = morningNote.value.trim();
 
-  records[selectedDate] = record;
-  saveRecords(records);
+  try {
+    await saveRecordToCloud(selectedDate, record);
 
-  renderCalendar();
-renderRecordDetail(selectedDate);
-alert("午前の記録を保存したぞ。");
+    renderCalendar();
+    renderRecordDetail(selectedDate);
+
+    alert("午前の記録を保存したぞ。");
+  } catch (error) {
+    console.error("午前の記録保存に失敗しました", error);
+    alert("午前の記録保存に失敗した。");
+  }
 }
 
-function saveAfternoonRecord() {
-
+async function saveAfternoonRecord() {
   if (currentRole !== "owner") {
-  alert("職員アカウントでは記録本文を編集できません。");
-  return;
-}
-  
-  const records = loadRecords();
+    alert("職員アカウントでは記録本文を編集できません。");
+    return;
+  }
+
   const selectedDate = dateInput.value;
+  const records = loadRecords();
   const record = normalizeRecord(records[selectedDate]);
 
   record.afternoon.mood = afternoonMood.value;
   record.afternoon.done = afternoonDone.value.trim();
   record.afternoon.impression = afternoonImpression.value.trim();
 
-  records[selectedDate] = record;
-  saveRecords(records);
+  try {
+    await saveRecordToCloud(selectedDate, record);
 
-  renderCalendar();
-renderRecordDetail(selectedDate);
-alert("午後の記録を保存したぞ。");
+    renderCalendar();
+    renderRecordDetail(selectedDate);
+
+    alert("午後の記録を保存したぞ。");
+  } catch (error) {
+    console.error("午後の記録保存に失敗しました", error);
+    alert("午後の記録保存に失敗した。");
+  }
 }
 
 function saveCurrentPeriodSilently(period) {
+  if (currentRole !== "owner") {
+    return;
+  }
+
   const records = loadRecords();
   const selectedDate = dateInput.value;
   const record = normalizeRecord(records[selectedDate]);
@@ -332,17 +392,15 @@ function saveCurrentPeriodSilently(period) {
     record.afternoon.impression = afternoonImpression.value.trim();
   }
 
-  records[selectedDate] = record;
-  saveRecords(records);
+  appData.records[selectedDate] = record;
 }
 
-function deleteCurrentRecord() {
-
+async function deleteCurrentRecord() {
   if (currentRole !== "owner") {
-  alert("職員アカウントでは記録本文を編集できません。");
-  return;
-}
-  
+    alert("職員アカウントでは記録を削除できません。");
+    return;
+  }
+
   const selectedDate = dateInput.value;
   const records = loadRecords();
 
@@ -357,19 +415,28 @@ function deleteCurrentRecord() {
     return;
   }
 
-  delete records[selectedDate];
-  saveRecords(records);
+  try {
+    await deleteRecordFromCloud(selectedDate);
 
-  loadFormByDate();
-  renderCalendar();
+    loadFormByDate();
+    renderCalendar();
+    renderRecordDetail(selectedDate);
+  } catch (error) {
+    console.error("記録削除に失敗しました", error);
+    alert("記録の削除に失敗した。");
+  }
 }
 
-function setStamp(period) {
+async function setStamp(period) {
   saveCurrentPeriodSilently(period);
 
   const targetSelect = period === "morning"
     ? morningStaffSelect
     : afternoonStaffSelect;
+
+  const targetComment = period === "morning"
+    ? morningStaffComment
+    : afternoonStaffComment;
 
   const staffName = targetSelect.value;
 
@@ -378,27 +445,42 @@ function setStamp(period) {
     return;
   }
 
-  const records = loadRecords();
   const selectedDate = dateInput.value;
+  const records = loadRecords();
   const record = normalizeRecord(records[selectedDate]);
 
-  const targetComment = period === "morning"
-  ? morningStaffComment
-  : afternoonStaffComment;
+  const hasRecord =
+    record.morning.mood ||
+    record.morning.todo ||
+    record.morning.note ||
+    record.afternoon.mood ||
+    record.afternoon.done ||
+    record.afternoon.impression;
 
-record[period].stamp = {
-  staffName: staffName,
-  stampedAt: new Date().toISOString(),
-  comment: targetComment.value.trim()
-};
+  if (!hasRecord && currentRole !== "owner") {
+    alert("この日の記録がまだないため、職員アカウントでは確認を保存できません。");
+    return;
+  }
 
-  records[selectedDate] = record;
-  saveRecords(records);
+  record[period].stamp = {
+    staffName: staffName,
+    stampedAt: new Date().toISOString(),
+    comment: targetComment.value.trim()
+  };
 
-  renderStaffSelect(period);
-  renderStamp(period);
-  renderCalendar();
-  renderRecordDetail(selectedDate);
+  try {
+    await saveRecordToCloud(selectedDate, record);
+
+    renderStaffSelect(period);
+    renderStamp(period);
+    renderCalendar();
+    renderRecordDetail(selectedDate);
+
+    alert("確認を保存しました。");
+  } catch (error) {
+    console.error("確認保存に失敗しました", error);
+    alert("確認の保存に失敗した。権限かルールを確認してね。");
+  }
 }
 
 function renderAllStaffSelects() {
@@ -467,15 +549,16 @@ function renderStamp(period) {
   wrapper.className = "stamp-wrap";
 
   wrapper.innerHTML = `
-  <div class="stamp">
-    <div>
-      <div class="stamp-name">${escapeHtml(stamp.staffName)}</div>
-      <div class="stamp-text">${periodLabel}確認</div>
+    <div class="stamp">
+      <div>
+        <div class="stamp-name">${escapeHtml(stamp.staffName)}</div>
+        <div class="stamp-text">${periodLabel}確認</div>
+      </div>
     </div>
-  </div>
-  <div class="stamp-time">${timeText}</div>
-  ${stamp.comment ? `<div class="stamp-comment">${escapeHtml(stamp.comment)}</div>` : ""}
-`;
+    <div class="stamp-time">${timeText}</div>
+    ${stamp.comment ? `<div class="stamp-comment">${escapeHtml(stamp.comment)}</div>` : ""}
+  `;
+
   targetElement.appendChild(wrapper);
 }
 
@@ -533,13 +616,124 @@ function renderCalendar() {
     `;
 
     cell.addEventListener("click", () => {
-  dateInput.value = dateKey;
-  loadFormByDate();
-  renderRecordDetail(dateKey);
-});
+      dateInput.value = dateKey;
+      loadFormByDate();
+      renderRecordDetail(dateKey);
+
+      recordDetail.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    });
 
     calendar.appendChild(cell);
   }
+}
+
+function renderRecordDetail(dateKey) {
+  const records = loadRecords();
+  const record = records[dateKey] ? normalizeRecord(records[dateKey]) : null;
+
+  if (!record) {
+    recordDetail.innerHTML = `
+      <p class="detail-date">${escapeHtml(dateKey)} の記録</p>
+      <p class="hint">この日の記録はまだないよ。</p>
+    `;
+    return;
+  }
+
+  const morningMoodText = record.morning.mood
+    ? `${moodIcons[record.morning.mood] || ""} ${record.morning.mood}`
+    : "未記録";
+
+  const afternoonMoodText = record.afternoon.mood
+    ? `${moodIcons[record.afternoon.mood] || ""} ${record.afternoon.mood}`
+    : "未記録";
+
+  const morningStampText = formatStampText(record.morning.stamp);
+  const afternoonStampText = formatStampText(record.afternoon.stamp);
+
+  recordDetail.innerHTML = `
+    <p class="detail-date">${escapeHtml(dateKey)} の記録</p>
+
+    <div class="detail-grid">
+      <section class="detail-card">
+        <h3>午前</h3>
+
+        <p class="detail-row">
+          <span class="detail-label">気分：</span>
+          ${escapeHtml(morningMoodText)}
+        </p>
+
+        <p class="detail-row">
+          <span class="detail-label">今日やりたいこと：</span><br>
+          ${escapeHtml(record.morning.todo || "未記入")}
+        </p>
+
+        <p class="detail-row">
+          <span class="detail-label">ひとこと：</span><br>
+          ${escapeHtml(record.morning.note || "未記入")}
+        </p>
+
+        <p class="detail-stamp">
+          確認：${escapeHtml(morningStampText)}
+        </p>
+
+        ${record.morning.stamp?.comment ? `
+          <p class="detail-comment">
+            <span class="detail-label">職員コメント：</span><br>
+            ${escapeHtml(record.morning.stamp.comment)}
+          </p>
+        ` : ""}
+      </section>
+
+      <section class="detail-card">
+        <h3>午後</h3>
+
+        <p class="detail-row">
+          <span class="detail-label">気分：</span>
+          ${escapeHtml(afternoonMoodText)}
+        </p>
+
+        <p class="detail-row">
+          <span class="detail-label">なにをやったか：</span><br>
+          ${escapeHtml(record.afternoon.done || "未記入")}
+        </p>
+
+        <p class="detail-row">
+          <span class="detail-label">感想：</span><br>
+          ${escapeHtml(record.afternoon.impression || "未記入")}
+        </p>
+
+        <p class="detail-stamp">
+          確認：${escapeHtml(afternoonStampText)}
+        </p>
+
+        ${record.afternoon.stamp?.comment ? `
+          <p class="detail-comment">
+            <span class="detail-label">職員コメント：</span><br>
+            ${escapeHtml(record.afternoon.stamp.comment)}
+          </p>
+        ` : ""}
+      </section>
+    </div>
+  `;
+}
+
+function formatStampText(stamp) {
+  if (!stamp) {
+    return "未確認";
+  }
+
+  const stampedDate = new Date(stamp.stampedAt);
+
+  if (Number.isNaN(stampedDate.getTime())) {
+    return stamp.staffName;
+  }
+
+  const timeText = `${String(stampedDate.getHours()).padStart(2, "0")}:${String(stampedDate.getMinutes()).padStart(2, "0")}`;
+
+  return `${stamp.staffName} ${timeText}`;
 }
 
 function renderStaffSettings() {
@@ -574,6 +768,11 @@ function renderStaffSettings() {
 }
 
 function toggleStaffVisibility(index) {
+  if (currentRole !== "owner") {
+    alert("職員設定は小田さん用です。");
+    return;
+  }
+
   const staff = loadStaff();
 
   if (!staff[index]) {
@@ -596,28 +795,6 @@ function escapeHtml(text) {
     .replaceAll("'", "&#039;");
 }
 
-async function login() {
-  loginError.textContent = "";
-
-  const email = loginEmail.value.trim();
-  const password = loginPassword.value;
-
-  if (!email || !password) {
-    loginError.textContent = "メールアドレスとパスワードを入力してね。";
-    return;
-  }
-
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (error) {
-    console.error("ログイン失敗", error);
-    loginError.textContent = "ログインに失敗しました。メールアドレスかパスワードを確認してね。";
-  }
-}
-
-async function logout() {
-  await signOut(auth);
-}
 function init() {
   dateInput.value = getTodayString();
 
@@ -683,16 +860,11 @@ function init() {
 
     try {
       await loadCloudData();
-      saveStaff(loadStaff());
 
       loadFormByDate();
       renderCalendar();
       renderStaffSettings();
-
-      if (typeof renderRecordDetail === "function") {
-        renderRecordDetail(dateInput.value);
-      }
-
+      renderRecordDetail(dateInput.value);
       applyRoleView();
     } catch (error) {
       console.error("Firebase読み込みエラー", error);
@@ -700,111 +872,5 @@ function init() {
     }
   });
 }
-
-function renderRecordDetail(dateKey) {
-  const records = loadRecords();
-  const record = records[dateKey] ? normalizeRecord(records[dateKey]) : null;
-
-  if (!record) {
-    recordDetail.innerHTML = `
-      <p class="detail-date">${dateKey}</p>
-      <p class="hint">この日の記録はまだないよ。</p>
-    `;
-    return;
-  }
-
-  const morningMoodText = record.morning.mood
-    ? `${moodIcons[record.morning.mood] || ""} ${record.morning.mood}`
-    : "未記録";
-
-  const afternoonMoodText = record.afternoon.mood
-    ? `${moodIcons[record.afternoon.mood] || ""} ${record.afternoon.mood}`
-    : "未記録";
-
-  const morningStampText = formatStampText(record.morning.stamp);
-  const afternoonStampText = formatStampText(record.afternoon.stamp);
-
-  recordDetail.innerHTML = `
-    <p class="detail-date">${dateKey}</p>
-
-    <div class="detail-grid">
-      <section class="detail-card">
-        <h3>午前</h3>
-
-        <p class="detail-row">
-          <span class="detail-label">気分：</span>
-          ${escapeHtml(morningMoodText)}
-        </p>
-
-        <p class="detail-row">
-          <span class="detail-label">今日やりたいこと：</span><br>
-          ${escapeHtml(record.morning.todo || "未記入")}
-        </p>
-
-        <p class="detail-row">
-          <span class="detail-label">ひとこと：</span><br>
-          ${escapeHtml(record.morning.note || "未記入")}
-        </p>
-
-        <p class="detail-stamp">
-  確認：${escapeHtml(morningStampText)}
-</p>
-
-${record.morning.stamp?.comment ? `
-  <p class="detail-comment">
-    <span class="detail-label">職員コメント：</span><br>
-    ${escapeHtml(record.morning.stamp.comment)}
-  </p>
-` : ""}
-
-      <section class="detail-card">
-        <h3>午後</h3>
-
-        <p class="detail-row">
-          <span class="detail-label">気分：</span>
-          ${escapeHtml(afternoonMoodText)}
-        </p>
-
-        <p class="detail-row">
-          <span class="detail-label">なにをやったか：</span><br>
-          ${escapeHtml(record.afternoon.done || "未記入")}
-        </p>
-
-        <p class="detail-row">
-          <span class="detail-label">感想：</span><br>
-          ${escapeHtml(record.afternoon.impression || "未記入")}
-        </p>
-
-        <p class="detail-stamp">
-  確認：${escapeHtml(afternoonStampText)}
-</p>
-
-${record.afternoon.stamp?.comment ? `
-  <p class="detail-comment">
-    <span class="detail-label">職員コメント：</span><br>
-    ${escapeHtml(record.afternoon.stamp.comment)}
-  </p>
-` : ""}
-      </section>
-    </div>
-  `;
-}
-
-function formatStampText(stamp) {
-  if (!stamp) {
-    return "未確認";
-  }
-
-  const stampedDate = new Date(stamp.stampedAt);
-
-  if (Number.isNaN(stampedDate.getTime())) {
-    return stamp.staffName;
-  }
-
-  const timeText = `${String(stampedDate.getHours()).padStart(2, "0")}:${String(stampedDate.getMinutes()).padStart(2, "0")}`;
-
-  return `${stamp.staffName} ${timeText}`;
-}
-
 
 init();
