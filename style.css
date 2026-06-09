@@ -799,3 +799,13 @@ textarea:focus {
     width: 100%;
   }
 }
+
+
+.owner-only,
+.staff-only {
+  display: block;
+}
+
+.hidden {
+  display: none !important;
+}
