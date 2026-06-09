@@ -2,12 +2,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/fireba
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "ここに apiKey",
-  authDomain: "ここに authDomain",
-  projectId: "ここに projectId",
-  storageBucket: "ここに storageBucket",
-  messagingSenderId: "ここに messagingSenderId",
-  appId: "ここに appId"
+  apiKey: "AIzaSyDxc8VvDQXfAJVwdeGyKJ04sEyQxS4BKQU",
+  authDomain: "oda-log.firebaseapp.com",
+  projectId: "oda-log",
+  storageBucket: "oda-log.firebasestorage.app",
+  messagingSenderId: "236113315684",
+  appId: "1:236113315684:web:3ce6be3619cf1b6d4e1c71"
 };
 
 const app = initializeApp(firebaseConfig);
