@@ -90,6 +90,15 @@ const nextMonthButton = document.getElementById("nextMonthButton");
 const staffSettingsList = document.getElementById("staffSettingsList");
 const recordDetail = document.getElementById("recordDetail");
 
+const staffMorningStaffSelect = document.getElementById("staffMorningStaffSelect");
+const staffAfternoonStaffSelect = document.getElementById("staffAfternoonStaffSelect");
+
+const staffMorningStaffComment = document.getElementById("staffMorningStaffComment");
+const staffAfternoonStaffComment = document.getElementById("staffAfternoonStaffComment");
+
+const staffMorningStampButton = document.getElementById("staffMorningStampButton");
+const staffAfternoonStampButton = document.getElementById("staffAfternoonStampButton");
+
 let currentCalendarDate = new Date();
 
 let currentUser = null;
@@ -123,23 +132,13 @@ function getUserRole(user) {
 function applyRoleView() {
   const isOwner = currentRole === "owner";
 
-  const staffSettingsCard = staffSettingsList.closest(".card");
+  document.querySelectorAll(".owner-only").forEach((element) => {
+    element.classList.toggle("hidden", !isOwner);
+  });
 
-  if (staffSettingsCard) {
-    staffSettingsCard.classList.toggle("hidden", !isOwner);
-  }
-
-  deleteButton.classList.toggle("hidden", !isOwner);
-  saveMorningButton.classList.toggle("hidden", !isOwner);
-  saveAfternoonButton.classList.toggle("hidden", !isOwner);
-
-  morningMood.disabled = !isOwner;
-  morningTodo.disabled = !isOwner;
-  morningNote.disabled = !isOwner;
-
-  afternoonMood.disabled = !isOwner;
-  afternoonDone.disabled = !isOwner;
-  afternoonImpression.disabled = !isOwner;
+  document.querySelectorAll(".staff-only").forEach((element) => {
+    element.classList.toggle("hidden", isOwner);
+  });
 }
 
 async function login() {
@@ -310,6 +309,7 @@ function loadFormByDate() {
   afternoonImpression.value = record.afternoon.impression;
 
   renderAllStaffSelects();
+  renderStaffCheckSelects();
   renderAllStamps();
 
   if (typeof renderRecordDetail === "function") {
@@ -517,6 +517,45 @@ function renderStaffSelect(period) {
 
   targetComment.value = record[period].stamp?.comment || "";
 }
+
+
+
+function renderStaffCheckSelects() {
+  renderStaffCheckSelect("morning");
+  renderStaffCheckSelect("afternoon");
+}
+
+function renderStaffCheckSelect(period) {
+  const staff = loadStaff();
+  const visibleStaff = staff.filter((member) => member.visible);
+  const record = getSelectedDateRecord();
+
+  const targetSelect = period === "morning"
+    ? staffMorningStaffSelect
+    : staffAfternoonStaffSelect;
+
+  const targetComment = period === "morning"
+    ? staffMorningStaffComment
+    : staffAfternoonStaffComment;
+
+  targetSelect.innerHTML = `<option value="">職員を選択</option>`;
+
+  visibleStaff.forEach((member) => {
+    const option = document.createElement("option");
+    option.value = member.name;
+    option.textContent = member.name;
+
+    if (record[period].stamp && record[period].stamp.staffName === member.name) {
+      option.selected = true;
+    }
+
+    targetSelect.appendChild(option);
+  });
+
+  targetComment.value = record[period].stamp?.comment || "";
+}
+
+
 
 function renderAllStamps() {
   renderStamp("morning");
@@ -806,6 +845,14 @@ function init() {
     }
   });
 
+  staffMorningStampButton.addEventListener("click", () => {
+  setStaffOnlyStamp("morning");
+});
+
+staffAfternoonStampButton.addEventListener("click", () => {
+  setStaffOnlyStamp("afternoon");
+});
+
   logoutButton.addEventListener("click", logout);
 
   saveMorningButton.addEventListener("click", saveMorningRecord);
@@ -871,6 +918,59 @@ function init() {
       alert("Firebaseからデータを読み込めなかった。設定を確認してね。");
     }
   });
+}
+
+async function setStaffOnlyStamp(period) {
+  const targetSelect = period === "morning"
+    ? staffMorningStaffSelect
+    : staffAfternoonStaffSelect;
+
+  const targetComment = period === "morning"
+    ? staffMorningStaffComment
+    : staffAfternoonStaffComment;
+
+  const staffName = targetSelect.value;
+
+  if (!staffName) {
+    alert("職員を選択してね。");
+    return;
+  }
+
+  const selectedDate = dateInput.value;
+  const records = loadRecords();
+  const record = normalizeRecord(records[selectedDate]);
+
+  const hasRecord =
+    record.morning.mood ||
+    record.morning.todo ||
+    record.morning.note ||
+    record.afternoon.mood ||
+    record.afternoon.done ||
+    record.afternoon.impression;
+
+  if (!hasRecord && currentRole !== "owner") {
+    alert("この日の記録がまだないため、確認を保存できません。");
+    return;
+  }
+
+  record[period].stamp = {
+    staffName,
+    stampedAt: new Date().toISOString(),
+    comment: targetComment.value.trim()
+  };
+
+  try {
+    await saveRecordToCloud(selectedDate, record);
+
+    renderStaffCheckSelect(period);
+    renderCalendar();
+    renderRecordDetail(selectedDate);
+
+    alert("確認を保存しました。");
+  } catch (error) {
+    console.error("確認保存に失敗しました", error);
+    alert("確認の保存に失敗した。権限かルールを確認してね。");
+  }
 }
 
 init();
