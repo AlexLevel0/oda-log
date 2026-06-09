@@ -38,6 +38,9 @@ const deleteButton = document.getElementById("deleteButton");
 const morningStaffSelect = document.getElementById("morningStaffSelect");
 const afternoonStaffSelect = document.getElementById("afternoonStaffSelect");
 
+const morningStaffComment = document.getElementById("morningStaffComment");
+const afternoonStaffComment = document.getElementById("afternoonStaffComment");
+
 const morningStampButton = document.getElementById("morningStampButton");
 const afternoonStampButton = document.getElementById("afternoonStampButton");
 
@@ -270,10 +273,15 @@ function setStamp(period) {
   const selectedDate = dateInput.value;
   const record = normalizeRecord(records[selectedDate]);
 
-  record[period].stamp = {
-    staffName: staffName,
-    stampedAt: new Date().toISOString()
-  };
+  const targetComment = period === "morning"
+  ? morningStaffComment
+  : afternoonStaffComment;
+
+record[period].stamp = {
+  staffName: staffName,
+  stampedAt: new Date().toISOString(),
+  comment: targetComment.value.trim()
+};
 
   records[selectedDate] = record;
   saveRecords(records);
@@ -298,6 +306,10 @@ function renderStaffSelect(period) {
     ? morningStaffSelect
     : afternoonStaffSelect;
 
+  const targetComment = period === "morning"
+    ? morningStaffComment
+    : afternoonStaffComment;
+
   targetSelect.innerHTML = `<option value="">職員を選択</option>`;
 
   visibleStaff.forEach((member) => {
@@ -311,6 +323,8 @@ function renderStaffSelect(period) {
 
     targetSelect.appendChild(option);
   });
+
+  targetComment.value = record[period].stamp?.comment || "";
 }
 
 function renderAllStamps() {
@@ -344,15 +358,15 @@ function renderStamp(period) {
   wrapper.className = "stamp-wrap";
 
   wrapper.innerHTML = `
-    <div class="stamp">
-      <div>
-        <div class="stamp-name">${escapeHtml(stamp.staffName)}</div>
-        <div class="stamp-text">${periodLabel}確認</div>
-      </div>
+  <div class="stamp">
+    <div>
+      <div class="stamp-name">${escapeHtml(stamp.staffName)}</div>
+      <div class="stamp-text">${periodLabel}確認</div>
     </div>
-    <div class="stamp-time">${timeText}</div>
-  `;
-
+  </div>
+  <div class="stamp-time">${timeText}</div>
+  ${stamp.comment ? `<div class="stamp-comment">${escapeHtml(stamp.comment)}</div>` : ""}
+`;
   targetElement.appendChild(wrapper);
 }
 
@@ -564,9 +578,15 @@ function renderRecordDetail(dateKey) {
         </p>
 
         <p class="detail-stamp">
-          確認：${escapeHtml(morningStampText)}
-        </p>
-      </section>
+  確認：${escapeHtml(morningStampText)}
+</p>
+
+${record.morning.stamp?.comment ? `
+  <p class="detail-comment">
+    <span class="detail-label">職員コメント：</span><br>
+    ${escapeHtml(record.morning.stamp.comment)}
+  </p>
+` : ""}
 
       <section class="detail-card">
         <h3>午後</h3>
@@ -587,8 +607,15 @@ function renderRecordDetail(dateKey) {
         </p>
 
         <p class="detail-stamp">
-          確認：${escapeHtml(afternoonStampText)}
-        </p>
+  確認：${escapeHtml(afternoonStampText)}
+</p>
+
+${record.afternoon.stamp?.comment ? `
+  <p class="detail-comment">
+    <span class="detail-label">職員コメント：</span><br>
+    ${escapeHtml(record.afternoon.stamp.comment)}
+  </p>
+` : ""}
       </section>
     </div>
   `;
