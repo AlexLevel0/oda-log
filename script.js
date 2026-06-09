@@ -35,8 +35,11 @@ const saveMorningButton = document.getElementById("saveMorningButton");
 const saveAfternoonButton = document.getElementById("saveAfternoonButton");
 const deleteButton = document.getElementById("deleteButton");
 
-const morningStaffButtons = document.getElementById("morningStaffButtons");
-const afternoonStaffButtons = document.getElementById("afternoonStaffButtons");
+const morningStaffSelect = document.getElementById("morningStaffSelect");
+const afternoonStaffSelect = document.getElementById("afternoonStaffSelect");
+
+const morningStampButton = document.getElementById("morningStampButton");
+const afternoonStampButton = document.getElementById("afternoonStampButton");
 
 const morningStampDisplay = document.getElementById("morningStampDisplay");
 const afternoonStampDisplay = document.getElementById("afternoonStampDisplay");
@@ -167,8 +170,8 @@ function loadFormByDate() {
   afternoonDone.value = record.afternoon.done;
   afternoonImpression.value = record.afternoon.impression;
 
-  renderAllStaffButtons();
-  renderAllStamps();
+  renderAllStaffSelects();
+renderAllStamps();
 }
 
 function saveMorningRecord() {
@@ -246,35 +249,64 @@ function deleteCurrentRecord() {
   renderCalendar();
 }
 
-function setStamp(period, staffName) {
+function setStamp(period) {
   saveCurrentPeriodSilently(period);
+
+  const targetSelect = period === "morning"
+    ? morningStaffSelect
+    : afternoonStaffSelect;
+
+  const staffName = targetSelect.value;
+
+  if (!staffName) {
+    alert("職員を選択してね。");
+    return;
+  }
 
   const records = loadRecords();
   const selectedDate = dateInput.value;
   const record = normalizeRecord(records[selectedDate]);
 
-  const currentStamp = record[period].stamp;
-
-  if (currentStamp && currentStamp.staffName === staffName) {
-    record[period].stamp = null;
-  } else {
-    record[period].stamp = {
-      staffName: staffName,
-      stampedAt: new Date().toISOString()
-    };
-  }
+  record[period].stamp = {
+    staffName: staffName,
+    stampedAt: new Date().toISOString()
+  };
 
   records[selectedDate] = record;
   saveRecords(records);
 
-  renderStaffButtons(period);
+  renderStaffSelect(period);
   renderStamp(period);
   renderCalendar();
 }
 
-function renderAllStaffButtons() {
-  renderStaffButtons("morning");
-  renderStaffButtons("afternoon");
+function renderAllStaffSelects() {
+  renderStaffSelect("morning");
+  renderStaffSelect("afternoon");
+}
+
+function renderStaffSelect(period) {
+  const staff = loadStaff();
+  const visibleStaff = staff.filter((member) => member.visible);
+  const record = getSelectedDateRecord();
+
+  const targetSelect = period === "morning"
+    ? morningStaffSelect
+    : afternoonStaffSelect;
+
+  targetSelect.innerHTML = `<option value="">職員を選択</option>`;
+
+  visibleStaff.forEach((member) => {
+    const option = document.createElement("option");
+    option.value = member.name;
+    option.textContent = member.name;
+
+    if (record[period].stamp && record[period].stamp.staffName === member.name) {
+      option.selected = true;
+    }
+
+    targetSelect.appendChild(option);
+  });
 }
 
 function renderStaffButtons(period) {
@@ -463,7 +495,7 @@ function toggleStaffVisibility(index) {
 
   saveStaff(staff);
   renderStaffSettings();
-  renderAllStaffButtons();
+  renderAllStaffSelects();
 }
 
 function escapeHtml(text) {
@@ -487,6 +519,14 @@ function init() {
   saveMorningButton.addEventListener("click", saveMorningRecord);
   saveAfternoonButton.addEventListener("click", saveAfternoonRecord);
   deleteButton.addEventListener("click", deleteCurrentRecord);
+
+  morningStampButton.addEventListener("click", () => {
+  setStamp("morning");
+});
+
+afternoonStampButton.addEventListener("click", () => {
+  setStamp("afternoon");
+});
 
   dateInput.addEventListener("change", loadFormByDate);
 
