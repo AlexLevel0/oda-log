@@ -708,3 +708,54 @@ textarea:focus {
     width: 100%;
   }
 }
+
+/* 記録する日 専用レイアウト */
+.date-header {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 18px;
+}
+
+.date-title h2 {
+  margin-bottom: 0;
+}
+
+.date-label {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  color: #5f4e59;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.date-label span {
+  padding-left: 4px;
+}
+
+.date-label #dateInput {
+  width: 100%;
+  min-width: 0;
+}
+
+/* 既存指定を打ち消す */
+.today-card > .section-title-row {
+  display: unset;
+}
+
+@media (max-width: 760px) {
+  .date-header {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .date-label {
+    width: 100%;
+  }
+
+  .date-label #dateInput {
+    width: 100%;
+  }
+}
