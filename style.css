@@ -595,3 +595,68 @@ textarea:focus {
     font-size: 8px;
   }
 }
+
+/* カレンダー強制スマホ調整 */
+.card {
+  overflow: hidden;
+}
+
+.calendar-weekdays,
+.calendar {
+  width: 100%;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.calendar-weekdays span {
+  min-width: 0;
+  text-align: center;
+}
+
+.day-cell {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  min-height: 70px;
+  padding: 6px 2px;
+  border-radius: 14px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.day-number {
+  margin-bottom: 4px;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.day-moods {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  margin: 4px 0;
+  font-size: 14px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.day-stamps {
+  display: grid;
+  gap: 1px;
+  font-size: 8px;
+  line-height: 1.1;
+  font-weight: 900;
+}
+
+.stamp-ok,
+.stamp-none {
+  white-space: nowrap;
+}
+
+.slash,
+.empty-mark {
+  font-size: 10px;
+}
