@@ -684,3 +684,27 @@ textarea:focus {
     max-width: none;
   }
 }
+
+.date-title-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.date-input-wrap {
+  width: 170px;
+}
+
+.date-input-wrap #dateInput {
+  width: 100%;
+}
+
+@media (max-width: 760px) {
+  .date-title-row {
+    grid-template-columns: 1fr;
+  }
+
+  .date-input-wrap {
+    width: 100%;
+  }
+}
