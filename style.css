@@ -45,6 +45,7 @@ button {
 h1,
 h2,
 h3,
+h4,
 p {
   margin-top: 0;
 }
@@ -53,6 +54,11 @@ h1 {
   margin-bottom: 10px;
   font-size: clamp(32px, 8vw, 56px);
   letter-spacing: 0.06em;
+}
+
+h4 {
+  margin-bottom: 8px;
+  font-size: 18px;
 }
 
 .lead {
@@ -140,7 +146,7 @@ textarea:focus {
 }
 
 .stamp-area {
-  margin-top: 16px;
+  margin-top: 18px;
   padding-top: 18px;
   border-top: 1px dashed rgba(120, 80, 100, 0.22);
 }
@@ -187,8 +193,13 @@ textarea:focus {
   margin-top: 14px;
 }
 
+.stamp-wrap {
+  display: inline-grid;
+  justify-items: center;
+  gap: 4px;
+}
+
 .stamp {
-  position: relative;
   display: inline-grid;
   place-items: center;
   width: 92px;
@@ -211,8 +222,6 @@ textarea:focus {
 }
 
 .stamp-time {
-  width: 100%;
-  margin-top: 4px;
   color: #8a767d;
   font-size: 12px;
   text-align: center;
@@ -268,7 +277,7 @@ textarea:focus {
 }
 
 .day-cell {
-  min-height: 104px;
+  min-height: 112px;
   border: 1px solid rgba(120, 80, 100, 0.14);
   border-radius: 18px;
   padding: 10px;
@@ -294,23 +303,26 @@ textarea:focus {
 }
 
 .mood-line {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
+  display: grid;
+  gap: 3px;
   margin-top: 5px;
-  padding: 5px 7px;
-  border-radius: 999px;
+  padding: 6px 7px;
+  border-radius: 14px;
   background: #fff4f7;
   color: #65535d;
   font-size: 12px;
   font-weight: 800;
 }
 
+.mood-line-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .calendar-stamp {
-  margin-top: 7px;
   color: #c44747;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
 }
 
@@ -358,15 +370,9 @@ textarea:focus {
   }
 
   .day-cell {
-    min-height: 88px;
+    min-height: 96px;
     padding: 7px;
     border-radius: 14px;
-  }
-
-  .mood-line {
-    align-items: flex-start;
-    flex-direction: column;
-    border-radius: 12px;
   }
 
   .stamp {
