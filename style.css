@@ -660,3 +660,27 @@ textarea:focus {
 .empty-mark {
   font-size: 10px;
 }
+
+/* 記録する日のレイアウト調整 */
+.today-card > .section-title-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.today-card #dateInput {
+  width: 170px;
+}
+
+/* スマホでは日付入力を下に綺麗に出す */
+@media (max-width: 760px) {
+  .today-card > .section-title-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .today-card #dateInput {
+    width: 100%;
+    max-width: none;
+  }
+}
