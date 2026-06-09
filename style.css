@@ -544,11 +544,6 @@ textarea:focus {
     gap: 12px;
   }
 
-  .date-label,
-  #dateInput {
-    width: 100%;
-  }
-
   .form-grid {
     grid-template-columns: 1fr;
   }
@@ -619,4 +614,30 @@ textarea:focus {
   .day-stamps {
     font-size: 8px;
   }
+}
+
+
+@media (max-width: 760px) {
+  .date-header {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .date-label {
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  #dateInput {
+    width: 190px;
+    max-width: 100%;
+  }
+}
+
+#dateInput {
+  text-align: center;
+}
+
+#dateInput::-webkit-date-and-time-value {
+  text-align: center;
 }
