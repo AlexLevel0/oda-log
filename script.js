@@ -26,10 +26,13 @@ const moodIcons = {
 };
 
 const defaultStaff = [
-  { name: "佐藤さん", visible: true },
-  { name: "田中さん", visible: true },
-  { name: "鈴木さん", visible: true },
-  { name: "山本さん", visible: false },
+  { name: "手塚さん", visible: true },
+  { name: "古積さん", visible: true },
+  { name: "伊藤さん", visible: true },
+  { name: "島田さん", visible: true },
+  { name: "駒谷さん", visible: true },
+  { name: "久住さん", visible: true },
+  { name: "山崎さん", visible: false },
   { name: "職員A", visible: false },
   { name: "職員B", visible: false },
   { name: "職員C", visible: false }
