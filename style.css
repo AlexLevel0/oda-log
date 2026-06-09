@@ -2,6 +2,21 @@
   box-sizing: border-box;
 }
 
+:root {
+  --bg: #fbf7f2;
+  --card: rgba(255, 255, 255, 0.9);
+  --text: #2d2430;
+  --sub: #7c7078;
+  --muted: #b8aab1;
+  --line: rgba(120, 80, 100, 0.16);
+  --pink: #d95f87;
+  --pink-soft: #ffe6ee;
+  --pink-bg: #fff4f7;
+  --red: #c44747;
+  --green: #5b9b73;
+  --blue: #168cf2;
+}
+
 body {
   margin: 0;
   font-family:
@@ -10,11 +25,11 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-  color: #2d2430;
+  color: var(--text);
   background:
     radial-gradient(circle at top left, #fff1f6 0, transparent 32%),
     radial-gradient(circle at top right, #eef5ff 0, transparent 30%),
-    #fbf7f2;
+    var(--bg);
 }
 
 button,
@@ -29,16 +44,16 @@ button {
 }
 
 .app-header {
-  padding: 36px 20px 20px;
+  padding: 32px 16px 18px;
   text-align: center;
 }
 
 .eyebrow {
   margin: 0 0 6px;
-  color: #9a7180;
+  color: #a27586;
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  font-weight: 800;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -52,24 +67,34 @@ p {
 
 h1 {
   margin-bottom: 10px;
-  font-size: clamp(32px, 8vw, 56px);
+  font-size: 38px;
   letter-spacing: 0.06em;
+}
+
+h2 {
+  margin-bottom: 0;
+  font-size: 26px;
+}
+
+h3 {
+  margin-bottom: 16px;
+  font-size: 22px;
 }
 
 h4 {
   margin-bottom: 8px;
-  font-size: 18px;
+  font-size: 17px;
 }
 
 .lead {
-  margin: 0 auto;
   max-width: 520px;
-  color: #756a72;
+  margin: 0 auto;
+  color: var(--sub);
   line-height: 1.8;
 }
 
 .app-main {
-  width: min(1100px, calc(100% - 28px));
+  width: min(1100px, calc(100% - 24px));
   margin: 0 auto 50px;
   display: grid;
   gap: 18px;
@@ -77,9 +102,9 @@ h4 {
 
 .card,
 .mini-card {
-  border: 1px solid rgba(120, 80, 100, 0.16);
+  border: 1px solid var(--line);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--card);
   box-shadow: 0 18px 50px rgba(70, 45, 60, 0.08);
   backdrop-filter: blur(12px);
 }
@@ -94,18 +119,14 @@ h4 {
 
 .section-title-row {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
 }
 
-.section-title-row h2 {
-  margin-bottom: 0;
-}
-
 #dateInput {
-  width: 160px;
+  width: 170px;
 }
 
 .form-grid {
@@ -119,7 +140,7 @@ label {
   gap: 8px;
   margin-bottom: 14px;
   color: #5f4e59;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 input,
@@ -129,7 +150,7 @@ textarea {
   border: 1px solid rgba(120, 80, 100, 0.18);
   border-radius: 16px;
   padding: 12px 13px;
-  color: #2d2430;
+  color: var(--text);
   background: #fff;
   outline: none;
 }
@@ -141,9 +162,47 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: #d77c9a;
-  box-shadow: 0 0 0 4px rgba(215, 124, 154, 0.16);
+  border-color: var(--pink);
+  box-shadow: 0 0 0 4px rgba(217, 95, 135, 0.14);
 }
+
+.hint {
+  color: var(--sub);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ボタン */
+
+.primary-button,
+.danger-button,
+.staff-button,
+.staff-toggle-button,
+.month-controls button {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 900;
+}
+
+.primary-button {
+  color: #fff;
+  background: var(--text);
+}
+
+.danger-button {
+  color: #9a3048;
+  background: #ffe3e8;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+/* ハンコ */
 
 .stamp-area {
   margin-top: 18px;
@@ -151,42 +210,22 @@ textarea:focus {
   border-top: 1px dashed rgba(120, 80, 100, 0.22);
 }
 
-.hint {
-  color: #7c7078;
-  font-size: 14px;
-  line-height: 1.7;
-}
-
 .staff-buttons,
-.staff-settings-list,
 .stamp-list,
-.action-row,
-.month-controls,
-.mood-legend {
+.staff-settings-list {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.staff-button,
-.staff-toggle-button,
-.primary-button,
-.danger-button,
-.month-controls button {
-  border: 0;
-  border-radius: 999px;
-  padding: 10px 14px;
-  font-weight: 800;
-}
-
 .staff-button {
   color: #6f4050;
-  background: #ffe6ee;
+  background: var(--pink-soft);
 }
 
 .staff-button.active {
   color: #fff;
-  background: #d95f87;
+  background: var(--pink);
 }
 
 .stamp-list {
@@ -207,7 +246,7 @@ textarea:focus {
   border: 3px solid #d94f4f;
   border-radius: 50%;
   color: #d94f4f;
-  background: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.7);
   font-weight: 900;
   transform: rotate(-8deg);
 }
@@ -217,8 +256,8 @@ textarea:focus {
 }
 
 .stamp-text {
-  font-size: 13px;
-  letter-spacing: 0.12em;
+  font-size: 12px;
+  letter-spacing: 0.1em;
 }
 
 .stamp-time {
@@ -227,62 +266,65 @@ textarea:focus {
   text-align: center;
 }
 
-.action-row {
-  margin-top: 18px;
-}
-
-.primary-button {
-  color: #fff;
-  background: #2d2430;
-}
-
-.danger-button {
-  color: #9a3048;
-  background: #ffe3e8;
-}
+/* カレンダー */
 
 .month-controls {
+  display: flex;
   align-items: center;
+  gap: 12px;
 }
 
 .month-controls button {
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  color: var(--blue);
   background: #f4e8ef;
+  font-size: 26px;
 }
 
 #monthLabel {
-  min-width: 120px;
+  min-width: 130px;
+  font-size: 24px;
   font-weight: 900;
   text-align: center;
 }
 
 .mood-legend {
-  margin-bottom: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-bottom: 16px;
   color: #6e626a;
-  font-size: 13px;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .calendar-weekdays,
 .calendar {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
 }
 
 .calendar-weekdays {
   margin-bottom: 8px;
-  color: #9a7180;
-  font-size: 12px;
+  color: #a27586;
+  font-size: 13px;
   font-weight: 900;
   text-align: center;
 }
 
 .day-cell {
-  min-height: 92px;
+  min-width: 0;
+  width: 100%;
+  min-height: 90px;
   border: 1px solid rgba(120, 80, 100, 0.14);
   border-radius: 18px;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.72);
-  text-align: left;
+  padding: 8px 4px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.76);
+  text-align: center;
 }
 
 .day-cell.empty {
@@ -293,24 +335,70 @@ textarea:focus {
 }
 
 .day-cell.today {
-  border-color: #d95f87;
-  box-shadow: 0 0 0 3px rgba(217, 95, 135, 0.14);
+  border-color: var(--pink);
+  box-shadow: 0 0 0 3px rgba(217, 95, 135, 0.16);
 }
 
 .day-number {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+  color: var(--blue);
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.day-moods {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  margin: 6px 0;
+  font-size: 18px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.slash {
+  color: #b59aa6;
+  font-size: 13px;
   font-weight: 900;
 }
 
+.empty-mark {
+  color: #d0c0c8;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.day-stamps {
+  display: grid;
+  gap: 2px;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.stamp-ok {
+  color: var(--red);
+  white-space: nowrap;
+}
+
+.stamp-none {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* 旧表示が残ってても崩れないようにする */
+
 .mood-line {
   display: grid;
-  gap: 3px;
-  margin-top: 5px;
-  padding: 6px 7px;
-  border-radius: 14px;
-  background: #fff4f7;
+  gap: 2px;
+  margin-top: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--pink-bg);
   color: #65535d;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 800;
 }
 
@@ -318,13 +406,17 @@ textarea:focus {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 2px;
 }
 
 .calendar-stamp {
-  color: #c44747;
-  font-size: 11px;
+  color: var(--red);
+  font-size: 10px;
   font-weight: 900;
+  white-space: nowrap;
 }
+
+/* 職員設定 */
 
 .staff-setting-item {
   display: flex;
@@ -347,21 +439,80 @@ textarea:focus {
 
 .staff-toggle-button.visible {
   color: #fff;
-  background: #5b9b73;
+  background: var(--green);
 }
 
+.admin-hint {
+  padding: 10px 12px;
+  border-radius: 14px;
+  color: #7a3f52;
+  background: #fff0f5;
+  font-weight: 800;
+}
+
+/* スマホ */
+
 @media (max-width: 760px) {
+  .app-header {
+    padding: 28px 14px 16px;
+  }
+
+  h1 {
+    font-size: 34px;
+  }
+
+  h2 {
+    font-size: 24px;
+  }
+
+  .app-main {
+    width: min(100% - 20px, 520px);
+    gap: 16px;
+  }
+
+  .card {
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  .mini-card {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
   .section-title-row {
     align-items: flex-start;
     flex-direction: column;
+    gap: 10px;
+  }
+
+  #dateInput {
+    width: 100%;
   }
 
   .form-grid {
     grid-template-columns: 1fr;
   }
 
-  #dateInput {
+  .month-controls {
     width: 100%;
+    justify-content: space-between;
+  }
+
+  .month-controls button {
+    width: 54px;
+    height: 54px;
+    font-size: 24px;
+  }
+
+  #monthLabel {
+    min-width: auto;
+    font-size: 23px;
+  }
+
+  .mood-legend {
+    gap: 8px 12px;
+    font-size: 13px;
   }
 
   .calendar-weekdays,
@@ -369,51 +520,78 @@ textarea:focus {
     gap: 5px;
   }
 
+  .calendar-weekdays {
+    font-size: 12px;
+  }
+
   .day-cell {
     min-height: 78px;
-    padding: 7px;
-    border-radius: 14px;
+    padding: 7px 3px;
+    border-radius: 15px;
+  }
+
+  .day-number {
+    margin-bottom: 5px;
+    font-size: 17px;
+  }
+
+  .day-moods {
+    margin: 4px 0;
+    gap: 2px;
+    font-size: 16px;
+  }
+
+  .slash,
+  .empty-mark {
+    font-size: 11px;
+  }
+
+  .day-stamps {
+    gap: 1px;
+    font-size: 9px;
   }
 
   .stamp {
     width: 82px;
     height: 82px;
   }
+
+  .stamp-name {
+    font-size: 16px;
+  }
+
+  .stamp-text {
+    font-size: 11px;
+  }
 }
 
-.day-moods {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  margin: 10px 0 8px;
-  font-size: 20px;
-}
+/* かなり狭いスマホ */
 
-.slash {
-  color: #b59aa6;
-  font-size: 14px;
-  font-weight: 900;
-}
+@media (max-width: 390px) {
+  .card {
+    padding: 14px;
+  }
 
-.empty-mark {
-  color: #d0c0c8;
-  font-size: 14px;
-  font-weight: 900;
-}
+  .calendar-weekdays,
+  .calendar {
+    gap: 4px;
+  }
 
-.day-stamps {
-  display: grid;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 900;
-  text-align: center;
-}
+  .day-cell {
+    min-height: 72px;
+    padding: 6px 2px;
+    border-radius: 13px;
+  }
 
-.stamp-ok {
-  color: #c44747;
-}
+  .day-number {
+    font-size: 15px;
+  }
 
-.stamp-none {
-  color: #b8aab1;
+  .day-moods {
+    font-size: 15px;
+  }
+
+  .day-stamps {
+    font-size: 8px;
+  }
 }
