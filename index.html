@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>小田ログ</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <p class="eyebrow">Self Care Calendar</p>
+    <h1>小田ログ</h1>
+    <p class="lead">小田さんの午前と午後の気分を残して、あとから見返せるセルフケア記録。</p>
+  </header>
+
+  <main class="app-main">
+    <section class="card today-card">
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">Today</p>
+          <h2>今日の記録</h2>
+        </div>
+
+        <input id="dateInput" type="date" />
+      </div>
+
+      <div class="form-grid">
+        <section class="mini-card">
+          <h3>午前</h3>
+
+          <label>
+            今の気分
+            <select id="morningMood">
+              <option value="">選択してね</option>
+              <option value="元気">元気</option>
+              <option value="普通">普通</option>
+              <option value="そわそわ">そわそわ</option>
+              <option value="落ち込み">落ち込み</option>
+              <option value="眠い">眠い</option>
+              <option value="イライラ">イライラ</option>
+              <option value="しんどい">しんどい</option>
+            </select>
+          </label>
+
+          <label>
+            今日やりたいこと
+            <textarea id="morningTodo" rows="4" placeholder="例：サイト作りを進める"></textarea>
+          </label>
+
+          <label>
+            ひとこと
+            <textarea id="morningNote" rows="4" placeholder="例：今日はちょっと眠いけどやる気ある"></textarea>
+          </label>
+        </section>
+
+        <section class="mini-card">
+          <h3>午後</h3>
+
+          <label>
+            今の気分
+            <select id="afternoonMood">
+              <option value="">選択してね</option>
+              <option value="元気">元気</option>
+              <option value="普通">普通</option>
+              <option value="そわそわ">そわそわ</option>
+              <option value="落ち込み">落ち込み</option>
+              <option value="眠い">眠い</option>
+              <option value="イライラ">イライラ</option>
+              <option value="しんどい">しんどい</option>
+            </select>
+          </label>
+
+          <label>
+            なにをやったか
+            <textarea id="afternoonDone" rows="4" placeholder="例：通所して作業した"></textarea>
+          </label>
+
+          <label>
+            感想
+            <textarea id="afternoonImpression" rows="4" placeholder="例：疲れたけど進んだ"></textarea>
+          </label>
+        </section>
+      </div>
+
+      <section class="stamp-area">
+        <div class="section-title-row">
+          <div>
+            <p class="eyebrow">Stamp</p>
+            <h2>確認スタンプ</h2>
+          </div>
+        </div>
+
+        <p class="hint">このセルフケアを確認した職員のハンコを押す。確認印は1人だけ。</p>
+
+        <div id="staffButtons" class="staff-buttons"></div>
+
+        <div id="stampList" class="stamp-list"></div>
+      </section>
+
+      <div class="action-row">
+        <button id="saveButton" class="primary-button">保存する</button>
+        <button id="deleteButton" class="danger-button">この日の記録を削除</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">Calendar</p>
+          <h2>気分カレンダー</h2>
+        </div>
+
+        <div class="month-controls">
+          <button id="prevMonthButton">←</button>
+          <span id="monthLabel"></span>
+          <button id="nextMonthButton">→</button>
+        </div>
+      </div>
+
+      <div class="mood-legend">
+        <span>☀️ 元気</span>
+        <span>🌿 普通</span>
+        <span>🌪️ そわそわ</span>
+        <span>🌧️ 落ち込み</span>
+        <span>🌙 眠い</span>
+        <span>⚡ イライラ</span>
+        <span>🫠 しんどい</span>
+      </div>
+
+      <div class="calendar-weekdays">
+        <span>日</span>
+        <span>月</span>
+        <span>火</span>
+        <span>水</span>
+        <span>木</span>
+        <span>金</span>
+        <span>土</span>
+      </div>
+
+      <div id="calendar" class="calendar"></div>
+    </section>
+
+    <section class="card">
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">Staff</p>
+          <h2>職員ハンコ設定</h2>
+        </div>
+      </div>
+
+      <p class="hint">ONにした職員だけ、確認スタンプ欄に表示される。</p>
+
+      <div id="staffSettingsList" class="staff-settings-list"></div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
